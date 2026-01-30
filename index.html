@@ -1,907 +1,802 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PEAK Awards</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>PEAK — Royal Vote</title>
+
+  <!-- Medieval fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;600;800&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg1:#f7fbff;
-      --bg2:#eef5ff;
-      --ink:#111827;
-      --muted:#4b5563;
-      --card:#ffffffcc;
-      --card2:#ffffffa6;
-      --line:#d6e3ff;
-      --line2:#c7d7ff;
-      --gold:#c8a24a;
-      --blue:#3b82f6;
-      --ok:#16a34a;
-      --bad:#ef4444;
-      --shadow: 0 18px 55px rgba(15, 23, 42, .14);
-      --shadow2: 0 10px 30px rgba(15, 23, 42, .10);
+      --bg:#07090b;
+      --mist:#f3f6ff;
+      --ink:#0b0f14;
+
+      --paper: rgba(245, 240, 226, .92);
+      --paper2: rgba(245, 240, 226, .78);
+
+      --steel1:#e7eef8;
+      --steel2:#90a4bf;
+
+      --gold1:#f7e7b1;
+      --gold2:#caa24c;
+
+      --wine:#5b2030;
+      --emerald:#1b6b46;
+
+      --line: rgba(255,255,255,.16);
+      --shadow: 0 28px 80px rgba(0,0,0,.55);
+      --soft: 0 18px 55px rgba(0,0,0,.35);
+
       --r: 22px;
+      --r2: 18px;
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      color:var(--ink);
+      color:#f7f7fb;
+      overflow:hidden;
       background:
-        radial-gradient(1200px 700px at 30% 12%, rgba(255,255,255,.95), rgba(255,255,255,0) 60%),
-        radial-gradient(900px 650px at 80% 18%, rgba(219,234,254,.85), rgba(255,255,255,0) 62%),
-        radial-gradient(1100px 900px at 50% 85%, rgba(226,232,240,.80), rgba(255,255,255,0) 55%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
-      overflow-x:hidden;
+        radial-gradient(1400px 900px at 50% 30%, rgba(40,60,85,.26), transparent 60%),
+        radial-gradient(1000px 700px at 20% 70%, rgba(45,25,35,.22), transparent 62%),
+        radial-gradient(900px 700px at 80% 75%, rgba(25,75,55,.16), transparent 60%),
+        linear-gradient(180deg, #050608, #0b0e13 70%, #050608);
+      font-family: "IM Fell English", serif;
     }
 
-    /* fog */
+    /* castle silhouette + fog layers (pure CSS, no images yet) */
+    .sky{
+      position:fixed; inset:0;
+      background:
+        radial-gradient(1200px 700px at 50% 18%, rgba(255,255,255,.08), transparent 60%),
+        radial-gradient(900px 600px at 20% 20%, rgba(255,255,255,.06), transparent 55%),
+        radial-gradient(900px 600px at 80% 24%, rgba(255,255,255,.05), transparent 55%);
+      pointer-events:none;
+    }
+
+    .castle{
+      position:fixed; left:0; right:0; bottom:-10px; height:42vh;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0), rgba(0,0,0,.65)),
+        repeating-linear-gradient(
+          to right,
+          rgba(0,0,0,.0),
+          rgba(0,0,0,.0) 18px,
+          rgba(0,0,0,.08) 18px,
+          rgba(0,0,0,.08) 22px
+        );
+      mask-image: radial-gradient(900px 380px at 50% 40%, black 60%, transparent 100%);
+      opacity:.55;
+      pointer-events:none;
+    }
+
     .fog{
       position:fixed; inset:-40px;
-      pointer-events:none;
-      filter: blur(12px);
-      opacity:.85;
       background:
-        radial-gradient(700px 260px at 20% 25%, rgba(255,255,255,.70), transparent 70%),
-        radial-gradient(680px 240px at 80% 30%, rgba(255,255,255,.55), transparent 72%),
-        radial-gradient(900px 320px at 50% 75%, rgba(255,255,255,.60), transparent 72%);
-      animation: drift 16s ease-in-out infinite;
+        radial-gradient(700px 240px at 20% 65%, rgba(255,255,255,.10), transparent 70%),
+        radial-gradient(720px 260px at 60% 60%, rgba(255,255,255,.08), transparent 72%),
+        radial-gradient(680px 240px at 85% 68%, rgba(255,255,255,.09), transparent 72%),
+        radial-gradient(900px 360px at 50% 90%, rgba(255,255,255,.08), transparent 75%);
+      filter: blur(12px);
+      opacity: .95;
+      animation: fogMove 16s ease-in-out infinite;
+      pointer-events:none;
       mix-blend-mode: screen;
     }
-    @keyframes drift{
-      0%{ transform:translate3d(0,0,0) scale(1.02); }
-      50%{ transform:translate3d(-18px,8px,0) scale(1.05); }
-      100%{ transform:translate3d(0,0,0) scale(1.02); }
+    @keyframes fogMove{
+      0%{ transform: translate3d(0,0,0) scale(1.02); }
+      50%{ transform: translate3d(-16px,8px,0) scale(1.06); }
+      100%{ transform: translate3d(0,0,0) scale(1.02); }
     }
 
+    /* Layout */
     .wrap{
-      max-width:1100px;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      padding:16px;
+      max-width:1200px;
       margin:0 auto;
-      padding:22px 16px 40px;
       position:relative;
     }
 
     header{
-      display:flex; align-items:center; justify-content:space-between; gap:14px;
-      padding:16px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
       border:1px solid var(--line);
-      background: linear-gradient(180deg, var(--card), var(--card2));
       border-radius: var(--r);
-      box-shadow: var(--shadow2);
-      backdrop-filter: blur(10px);
-      position: sticky;
-      top: 12px;
-      z-index: 5;
+      background: linear-gradient(180deg, rgba(10,14,18,.62), rgba(10,14,18,.35));
+      backdrop-filter: blur(8px);
+      box-shadow: var(--soft);
     }
 
     .brand{
-      display:flex; flex-direction:column; gap:4px;
-    }
-    .brand .title{
-      display:flex; align-items:center; gap:10px;
-      font-weight:900;
-      letter-spacing:.5px;
-      font-size:18px;
-    }
-    .crest{
-      width:30px; height:30px; border-radius:12px;
-      border:1px solid var(--line2);
-      background:
-        radial-gradient(circle at 30% 25%, #ffffff, #e6efff 60%),
-        linear-gradient(180deg, #fff, #edf3ff);
-      box-shadow: inset 0 0 0 2px rgba(200,162,74,.18);
-      position:relative;
-    }
-    .crest:after{
-      content:"✦";
-      position:absolute; inset:0;
-      display:grid; place-items:center;
-      color:var(--gold);
-      font-weight:900;
-      text-shadow:0 6px 18px rgba(200,162,74,.25);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 240px;
     }
 
-    .brand .sub{ color:var(--muted); font-size:13px; }
+    .crest{
+      width:44px; height:44px; border-radius:14px;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.85), rgba(255,255,255,.16) 55%),
+        linear-gradient(180deg, rgba(215,180,90,.45), rgba(90,70,30,.18));
+      border:1px solid rgba(245,230,180,.35);
+      box-shadow: 0 18px 40px rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,255,255,.08);
+      display:grid;
+      place-items:center;
+      position:relative;
+    }
+    .crest:before{
+      content:"♛";
+      font-family: "Cinzel", serif;
+      font-weight: 800;
+      color: rgba(245,231,177,.95);
+      text-shadow: 0 10px 26px rgba(202,162,76,.22);
+      transform: translateY(-1px);
+      font-size: 22px;
+    }
+
+    .titles{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .titles .t1{
+      font-family: "Cinzel", serif;
+      font-weight: 800;
+      letter-spacing: .8px;
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+    .titles .t2{
+      font-size: 12px;
+      color: rgba(255,255,255,.72);
+    }
+
+    .meta{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      justify-content:flex-end;
+    }
 
     .pill{
       padding:8px 12px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.75);
       border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(10,14,18,.45);
       font-size:12px;
-      color:var(--muted);
-      display:flex; align-items:center; gap:8px;
-      white-space:nowrap;
+      color: rgba(255,255,255,.78);
+      backdrop-filter: blur(8px);
+      display:flex; gap:8px; align-items:center;
+      white-space: nowrap;
     }
+    .pill b{ color: rgba(245,231,177,.95); font-weight: 800; }
 
-    main{
-      margin-top:16px;
+    /* Main area: stage + drawer */
+    .stage{
+      flex:1;
       display:grid;
-      grid-template-columns: 1fr 0.65fr;
+      grid-template-columns: 1fr 0.9fr;
       gap:14px;
+      align-items:stretch;
+      min-height: 0;
     }
     @media (max-width: 980px){
-      main{ grid-template-columns: 1fr; }
+      .stage{ grid-template-columns: 1fr; }
     }
 
     .panel{
-      border:1px solid var(--line);
-      background: linear-gradient(180deg, var(--card), var(--card2));
+      border:1px solid rgba(255,255,255,.16);
       border-radius: var(--r);
+      background: linear-gradient(180deg, rgba(10,14,18,.62), rgba(10,14,18,.30));
+      backdrop-filter: blur(8px);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      padding:16px;
+      overflow:hidden;
+      position:relative;
+      min-height: 0;
+    }
+
+    .panelHead{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.14);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .panelHead .name{
+      font-family:"Cinzel", serif;
+      font-weight:800;
+      letter-spacing:.7px;
+      text-transform:uppercase;
+      font-size: 13px;
+      color: rgba(245,231,177,.92);
+    }
+    .panelHead .desc{
+      font-size: 12px;
+      color: rgba(255,255,255,.70);
+    }
+
+    /* “Parchment” inside */
+    .scroll{
+      margin:14px;
+      border-radius: 18px;
+      border:1px solid rgba(245,231,177,.26);
+      background:
+        radial-gradient(900px 280px at 30% 10%, rgba(255,255,255,.40), transparent 60%),
+        linear-gradient(180deg, var(--paper), var(--paper2));
+      color: var(--ink);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+    }
+    .scroll:before, .scroll:after{
+      content:"";
+      position:absolute;
+      width:130px; height:130px;
+      background: radial-gradient(circle at 30% 30%, rgba(202,162,76,.35), transparent 70%);
+      filter: blur(2px);
+      opacity:.7;
+    }
+    .scroll:before{ left:-44px; top:-44px; }
+    .scroll:after{ right:-52px; bottom:-52px; }
+
+    .scrollTitle{
+      font-family:"Cinzel", serif;
+      font-weight:800;
+      letter-spacing:.6px;
+      text-transform:uppercase;
+      font-size:14px;
+      margin-bottom:8px;
+    }
+    .scrollSub{
+      color: rgba(11,15,20,.74);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    /* Bottom category strip */
+    .bottomBar{
+      border:1px solid rgba(255,255,255,.16);
+      border-radius: var(--r);
+      background: linear-gradient(180deg, rgba(10,14,18,.60), rgba(10,14,18,.34));
+      backdrop-filter: blur(8px);
+      box-shadow: var(--soft);
+      padding:12px 12px 10px;
       overflow:hidden;
     }
 
-    .panel h2{
-      margin:0 0 10px 0;
-      font-size:14px;
-      letter-spacing:.25px;
-      color:#0f172a;
-      opacity:.9;
-      display:flex; align-items:center; gap:10px;
+    .catStrip{
+      display:flex;
+      gap:10px;
+      overflow:auto;
+      padding-bottom:6px;
+      scrollbar-width: thin;
     }
-    .panel h2 .dot{
-      width:10px; height:10px; border-radius:999px;
-      background: radial-gradient(circle at 30% 30%, #fff, #bcd6ff);
-      border:1px solid var(--line2);
-      box-shadow: 0 10px 20px rgba(59,130,246,.12);
+    .catStrip::-webkit-scrollbar{ height:8px; }
+    .catStrip::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.18); border-radius:999px; }
+
+    .cat{
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      cursor:pointer;
+      transition: .14s;
+      user-select:none;
+      min-width: 210px;
+    }
+    .cat:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); }
+    .cat.active{
+      outline: 2px solid rgba(245,231,177,.26);
+      background: rgba(245,231,177,.08);
     }
 
-    .screen{
-      display:none;
-      animation: pop .18s ease-out;
-    }
-    .screen.active{ display:block; }
-    @keyframes pop{
-      from{ opacity:0; transform: translateY(6px) scale(.99); }
-      to{ opacity:1; transform:none; }
-    }
-
-    .hero{
-      padding:18px;
-      border-radius: 18px;
-      border:1px solid var(--line);
+    .medal{
+      width:34px; height:34px; border-radius:12px;
+      border:1px solid rgba(245,231,177,.30);
       background:
-        radial-gradient(900px 260px at 15% 10%, rgba(255,255,255,.92), rgba(255,255,255,0) 70%),
-        linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.56));
-      box-shadow: inset 0 0 0 2px rgba(200,162,74,.10);
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.78), rgba(245,231,177,.14) 60%),
+        linear-gradient(180deg, rgba(202,162,76,.42), rgba(20,24,30,.08));
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.07);
+      display:grid; place-items:center;
+      color: rgba(245,231,177,.95);
+      font-family:"Cinzel", serif;
+      font-weight: 800;
     }
-    .hero h1{
-      margin:0;
-      font-size:26px;
-      letter-spacing:.4px;
+
+    .catText{
+      display:flex; flex-direction:column;
+      gap:2px;
+      line-height:1.1;
     }
-    .hero p{ margin:8px 0 0 0; color:var(--muted); }
+    .catText b{
+      font-family:"Cinzel", serif;
+      font-weight:800;
+      font-size: 12px;
+      letter-spacing:.5px;
+      text-transform:uppercase;
+    }
+    .catText span{
+      font-size: 12px;
+      color: rgba(255,255,255,.70);
+    }
 
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .grow{ flex:1; }
+    /* ===== Sword Drawer ===== */
+    .drawerWrap{
+      position:relative;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
 
-    input, select, textarea{
+    .drawer{
+      position:absolute;
+      inset:0;
+      transform: translateX(105%);
+      transition: transform .38s cubic-bezier(.2,.9,.2,1);
+      display:flex;
+      flex-direction:column;
+    }
+    .drawer.open{
+      transform: translateX(0);
+    }
+
+    /* sword visual on left edge of drawer */
+    .sword{
+      position:absolute;
+      left:-84px;
+      top:84px;
+      width: 140px;
+      height: 420px;
+      transform: rotate(-18deg);
+      opacity:0;
+      transition: opacity .18s ease, transform .38s cubic-bezier(.2,.9,.2,1);
+      filter: drop-shadow(0 18px 30px rgba(0,0,0,.55));
+      pointer-events:none;
+    }
+    .drawer.open .sword{
+      opacity:1;
+      transform: rotate(-10deg) translateX(-8px);
+    }
+
+    /* Sword parts */
+    .blade{
+      position:absolute;
+      left:52px;
+      top:0;
+      width:20px;
+      height:310px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(231,238,248,.95), rgba(144,164,191,.55));
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.15);
+      overflow:hidden;
+    }
+    .blade:after{
+      content:"";
+      position:absolute; inset:-40px;
+      background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,.55), transparent 60%);
+      transform: translateY(-60px);
+      animation: shine 2.6s ease-in-out infinite;
+      opacity:.55;
+    }
+    @keyframes shine{
+      0%{ transform: translateY(-120px); opacity:.0; }
+      35%{ opacity:.55; }
+      65%{ opacity:.35; }
+      100%{ transform: translateY(380px); opacity:.0; }
+    }
+    .guard{
+      position:absolute;
+      left:28px;
+      top:306px;
+      width:68px;
+      height:12px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(247,231,177,.9), rgba(202,162,76,.55));
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.10);
+    }
+    .hilt{
+      position:absolute;
+      left:54px;
+      top:318px;
+      width:16px;
+      height:58px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(90,32,48,.85), rgba(30,16,22,.85));
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.08);
+    }
+    .pommel{
+      position:absolute;
+      left:48px;
+      top:372px;
+      width:28px;
+      height:28px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.55), rgba(202,162,76,.55));
+      border:1px solid rgba(245,231,177,.25);
+      box-shadow: 0 18px 30px rgba(0,0,0,.30), inset 0 0 0 2px rgba(255,255,255,.08);
+    }
+
+    /* Drawer content */
+    .drawerInner{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      padding-left: 0;
+    }
+
+    .drawerBody{
+      padding:14px 14px 16px;
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:10px;
+      overflow:auto;
+      min-height:0;
+    }
+    @media (max-width: 980px){
+      .drawerBody{ grid-template-columns: 1fr; }
+    }
+
+    .knightCard{
+      border-radius: 18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      cursor:pointer;
+      transition:.15s;
+      user-select:none;
+      box-shadow: 0 18px 44px rgba(0,0,0,.30);
+    }
+    .knightCard:hover{ transform: translateY(-2px); background: rgba(255,255,255,.09); }
+    .knightCard.selected{
+      outline: 2px solid rgba(245,231,177,.30);
+      box-shadow: 0 0 0 6px rgba(245,231,177,.10), 0 18px 44px rgba(0,0,0,.32);
+    }
+    .portrait{
+      height:150px;
+      background:
+        radial-gradient(900px 220px at 20% 10%, rgba(255,255,255,.12), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.22));
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      padding:12px;
+      position:relative;
+    }
+    .portrait img{
+      position:absolute;
+      inset:0;
       width:100%;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid var(--line2);
-      background:rgba(255,255,255,.85);
-      outline:none;
-      font-size:14px;
-      color:#0f172a;
+      height:100%;
+      object-fit:cover;
+      opacity:.95;
+      filter: contrast(1.05) saturate(1.05);
     }
-    input:focus, select:focus, textarea:focus{
-      border-color: rgba(59,130,246,.55);
-      box-shadow: 0 0 0 4px rgba(59,130,246,.12);
+    .portrait:after{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(900px 280px at 30% 10%, rgba(255,255,255,.18), transparent 60%),
+                  linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.46));
+      pointer-events:none;
+    }
+
+    .banner{
+      position:relative;
+      display:flex; align-items:center; gap:10px;
+      z-index:1;
+    }
+    .shield{
+      width:34px;height:34px;border-radius:12px;
+      background: linear-gradient(180deg, rgba(231,238,248,.90), rgba(144,164,191,.45));
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.08);
+      display:grid; place-items:center;
+      font-family:"Cinzel", serif;
+      color: rgba(245,231,177,.95);
+      font-weight: 900;
+    }
+    .banner b{
+      font-family:"Cinzel", serif;
+      font-weight:800;
+      letter-spacing:.5px;
+      text-transform:uppercase;
+      font-size: 12px;
+      text-shadow: 0 18px 40px rgba(0,0,0,.45);
+    }
+
+    .knightMeta{
+      padding:10px 12px 12px;
+      color: rgba(255,255,255,.78);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .knightMeta .hint{
+      font-size:12px;
+      color: rgba(255,255,255,.66);
+    }
+    .crown{
+      color: rgba(245,231,177,.95);
+      text-shadow: 0 12px 28px rgba(202,162,76,.25);
+      font-size: 14px;
+    }
+
+    .drawerFooter{
+      padding:12px 14px 14px;
+      border-top: 1px solid rgba(255,255,255,.12);
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
     }
 
     .btn{
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(59,130,246,.35);
-      background: linear-gradient(180deg, #ffffff, #eef5ff);
-      color:#0f172a;
-      font-weight:800;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.90);
       cursor:pointer;
-      transition:.14s;
-      box-shadow: 0 10px 24px rgba(59,130,246,.12);
+      transition: .14s;
+      font-family:"Cinzel", serif;
+      font-weight: 800;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      font-size: 12px;
       user-select:none;
     }
-    .btn:hover{ transform: translateY(-1px); }
-    .btn:active{ transform: translateY(0px) scale(.99); }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.11); }
     .btn.primary{
-      border-color: rgba(200,162,74,.40);
-      background: linear-gradient(180deg, #fff8e8, #ffffff);
-      box-shadow: 0 10px 24px rgba(200,162,74,.14);
+      border-color: rgba(245,231,177,.30);
+      background: linear-gradient(180deg, rgba(245,231,177,.16), rgba(255,255,255,.08));
     }
-    .btn.ghost{
-      background: rgba(255,255,255,.55);
-      box-shadow:none;
-    }
-    .btn.danger{
-      border-color: rgba(239,68,68,.45);
-      background: linear-gradient(180deg, #fff1f2, #ffffff);
-      box-shadow: 0 10px 24px rgba(239,68,68,.10);
-    }
-    .btn:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-      transform:none;
-    }
+    .btn.ghost{ background: rgba(255,255,255,.04); }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
 
-    .split{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    @media (max-width:680px){ .split{ grid-template-columns:1fr; } }
-
-    /* Nominee cards */
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:10px;
-    }
-    @media (max-width:980px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width:520px){ .grid{ grid-template-columns: 1fr; } }
-
-    .card{
-      border:1px solid var(--line);
-      border-radius:18px;
-      background: rgba(255,255,255,.70);
-      overflow:hidden;
-      box-shadow: 0 12px 28px rgba(15,23,42,.10);
-      cursor:pointer;
-      transition:.15s;
-      position:relative;
-      user-select:none;
-    }
-    .card:hover{ transform: translateY(-2px); }
-    .card.selected{
-      outline: 3px solid rgba(200,162,74,.35);
-      box-shadow: 0 0 0 6px rgba(200,162,74,.12), 0 16px 36px rgba(15,23,42,.12);
-      transform: translateY(-2px);
-    }
-    .card img{
-      width:100%;
-      height:150px;
-      object-fit:cover;
-      filter: saturate(1.05) contrast(1.02);
-    }
-    .card .meta{
-      padding:10px 12px 12px;
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-    }
-    .name{
-      font-weight:900;
-      letter-spacing:.25px;
-    }
-    .sigil{
-      font-size:14px;
-      color:var(--gold);
-      text-shadow:0 10px 22px rgba(200,162,74,.25);
-    }
-
-    .toast{
+    /* little note */
+    .note{
       margin-top:10px;
-      border-radius:14px;
-      padding:10px 12px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.75);
-      color: var(--muted);
-      display:none;
+      font-size:12px;
+      color: rgba(255,255,255,.68);
+      line-height:1.35;
     }
-    .toast.show{ display:block; animation: pop .18s ease-out; }
-    .toast.ok{ border-color: rgba(22,163,74,.30); }
-    .toast.bad{ border-color: rgba(239,68,68,.32); }
-
-    .progress{
-      height:10px;
-      border-radius:999px;
-      background: rgba(15,23,42,.08);
-      border:1px solid rgba(15,23,42,.08);
-      overflow:hidden;
-      margin-top:10px;
-    }
-    .bar{
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, rgba(59,130,246,.65), rgba(200,162,74,.55));
-      border-radius:999px;
-      transition: width .25s ease;
-    }
-
-    .table{
-      display:flex; flex-direction:column; gap:8px;
-    }
-    .rowItem{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:10px 12px;
-      border:1px solid var(--line);
-      border-radius:16px;
-      background: rgba(255,255,255,.72);
-      box-shadow: 0 10px 22px rgba(15,23,42,.08);
-    }
-    .rank{
-      font-weight:900;
-      color: var(--gold);
-      min-width:44px;
-    }
-    .score{
-      font-weight:900;
-      color:#0f172a;
-    }
-    .tiny{ font-size:12px; color:var(--muted); }
-
-    .fadeIn{ animation: pop .18s ease-out; }
   </style>
 </head>
-
 <body>
+  <div class="sky"></div>
   <div class="fog"></div>
+  <div class="castle"></div>
 
   <div class="wrap">
     <header>
       <div class="brand">
-        <div class="title"><span class="crest"></span> PEAK Awards</div>
-        <div class="sub" id="headerSub">Голосование</div>
+        <div class="crest"></div>
+        <div class="titles">
+          <div class="t1">PEAK • Royal Vote</div>
+          <div class="t2">Нажимай номинацию снизу — меч достанет меню выбора</div>
+        </div>
       </div>
-      <div class="row">
-        <div class="pill" id="pillStage">Stage: —</div>
-        <div class="pill" id="pillProgress">—</div>
+      <div class="meta">
+        <div class="pill">Nomination: <b id="pillNom">—</b></div>
+        <div class="pill">Chosen: <b id="pillChosen">0</b></div>
       </div>
     </header>
 
-    <main>
+    <div class="stage">
+
+      <!-- Left: Lore + explanation -->
       <section class="panel">
-        <h2><span class="dot"></span> SCREEN</h2>
-
-        <!-- BOOT -->
-        <div class="screen active" id="scrBoot">
-          <div class="hero">
-            <h1>Awakening the Realm…</h1>
-            <p>Белый туман, сияние герба и готовность к PEAK.</p>
-            <div class="progress"><div class="bar" id="bootBar"></div></div>
-            <div class="toast show" id="bootText">loading…</div>
+        <div class="panelHead">
+          <div>
+            <div class="name">The Royal Chronicle</div>
+            <div class="desc">Голосование в стиле королей и замков</div>
           </div>
         </div>
 
-        <!-- MENU -->
-        <div class="screen" id="scrMenu">
-          <div class="hero">
-            <h1>Войти в голосование</h1>
-            <p>Введи свой ник и начни выбирать “Peak” в каждой номинации.</p>
+        <div class="scroll">
+          <div class="scrollTitle">Как это работает</div>
+          <div class="scrollSub">
+            Внизу — список номинаций. Нажми на любую:
+            <br><br>
+            ⚔︎ Меч “вытаскивает” панель выбора.<br>
+            ♛ Выбираешь человека — он становится победителем этой номинации от тебя.<br>
+            ✦ Так пройди все номинации.
+            <br><br>
+            <b>Пока что</b> это только дизайн и UX. Потом подключим отправку в таблицу.
           </div>
 
-          <div style="height:12px"></div>
-
-          <div class="split">
-            <div>
-              <label class="tiny">Твой ник</label>
-              <input id="voterName" placeholder="например: basuksosal" maxlength="30" />
-            </div>
-            <div>
-              <label class="tiny">Секретный код (опционально)</label>
-              <input id="passcode" placeholder="если хочешь ограничить доступ" maxlength="40" />
-            </div>
+          <div class="note">
+            Советы по стилю: добавим фоны замков, реальные мечи/гербы (картинки), и звуки металла.
           </div>
-
-          <div style="height:10px"></div>
-
-          <div class="row">
-            <button class="btn primary" id="btnStart">Начать голосование</button>
-            <button class="btn ghost" id="btnPreview">Предпросмотр номинаций</button>
-          </div>
-
-          <div class="toast" id="menuToast"></div>
         </div>
-
-        <!-- VOTE -->
-        <div class="screen" id="scrVote">
-          <div class="hero">
-            <h1 id="catTitle">Номинация</h1>
-            <p id="catHint">Выбери одного человека.</p>
-            <div class="progress"><div class="bar" id="voteBar"></div></div>
-          </div>
-
-          <div style="height:12px"></div>
-
-          <div class="grid" id="nomineeGrid"></div>
-
-          <div style="height:12px"></div>
-
-          <div class="row">
-            <button class="btn ghost" id="btnBack">Назад</button>
-            <button class="btn primary" id="btnNext" disabled>Дальше</button>
-          </div>
-
-          <div class="toast" id="voteToast"></div>
-        </div>
-
-        <!-- REVIEW -->
-        <div class="screen" id="scrReview">
-          <div class="hero">
-            <h1>Проверка</h1>
-            <p>Вот твои выборы. Отправим их в таблицу?</p>
-          </div>
-
-          <div style="height:12px"></div>
-
-          <div class="table" id="reviewList"></div>
-
-          <div style="height:12px"></div>
-
-          <div class="row">
-            <button class="btn ghost" id="btnEdit">Изменить</button>
-            <button class="btn primary" id="btnSend">Отправить в таблицу</button>
-          </div>
-
-          <div class="toast" id="sendToast"></div>
-        </div>
-
-        <!-- DONE -->
-        <div class="screen" id="scrDone">
-          <div class="hero">
-            <h1>Готово ✦</h1>
-            <p>Голос записан. Можно закрывать страницу.</p>
-          </div>
-          <div style="height:12px"></div>
-          <button class="btn" id="btnAgain">Проголосовать ещё раз</button>
-        </div>
-
       </section>
 
-      <aside class="panel">
-        <h2><span class="dot"></span> INFO</h2>
-
-        <div class="rowItem">
+      <!-- Right: Sword drawer -->
+      <section class="panel drawerWrap">
+        <div class="panelHead">
           <div>
-            <div class="tiny">Текущий этап</div>
-            <div id="infoStage" style="font-weight:900">—</div>
+            <div class="name" id="drawerTitle">Choose a Champion</div>
+            <div class="desc" id="drawerDesc">Выбери победителя для номинации</div>
           </div>
-          <div class="sigil">⚔︎</div>
-        </div>
-
-        <div style="height:10px"></div>
-
-        <div class="rowItem">
-          <div>
-            <div class="tiny">Голосующий</div>
-            <div id="infoVoter" style="font-weight:900">—</div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div class="pill" style="background:rgba(255,255,255,.06)">Tap category ↓</div>
           </div>
-          <div class="sigil">☁︎</div>
         </div>
 
-        <div style="height:10px"></div>
-
-        <div class="rowItem">
-          <div>
-            <div class="tiny">Прогресс</div>
-            <div id="infoProg" style="font-weight:900">—</div>
+        <div class="drawer" id="drawer">
+          <div class="sword" aria-hidden="true">
+            <div class="blade"></div>
+            <div class="guard"></div>
+            <div class="hilt"></div>
+            <div class="pommel"></div>
           </div>
-          <div class="sigil">✦</div>
+
+          <div class="drawerInner">
+            <div class="drawerBody" id="peopleGrid"></div>
+
+            <div class="drawerFooter">
+              <button class="btn ghost" id="btnClose">Close</button>
+              <button class="btn primary" id="btnConfirm" disabled>Confirm</button>
+            </div>
+          </div>
         </div>
 
-        <div style="height:14px"></div>
-
-        <div class="hero">
-          <h2 style="margin:0 0 8px 0; font-size:14px"><span class="dot"></span> Подсказка</h2>
-          <p style="margin:0;color:var(--muted);font-size:13px;line-height:1.45">
-            Это “PEAK Awards”: ты выбираешь одного человека в каждой номинации.
-            После отправки ответ попадёт в Google Таблицу.
-          </p>
+        <div style="padding:14px; color:rgba(255,255,255,.68); font-size:12px;">
+          Подсказка: выбери номинацию снизу, чтобы открыть “Sword Drawer”.
         </div>
+      </section>
+    </div>
 
-      </aside>
-    </main>
+    <!-- Bottom nominations strip -->
+    <section class="bottomBar">
+      <div class="catStrip" id="catStrip"></div>
+    </section>
   </div>
 
   <script>
-    /* =========================================================
-       1) НАСТРОЙКИ: номинации и друзья
-       ========================================================= */
-
-    // 1) НОМИНАЦИИ (можешь добавить сколько угодно)
+    /* ===== DATA (пока мок) ===== */
     const CATEGORIES = [
-      "Peak Aura",
-      "Peak Drip",
-      "Peak Humor",
-      "Peak Main Character",
-      "Peak IQ"
+      { id:"aura",  title:"Peak Aura",  sub:"Кто самый вайбовый?" },
+      { id:"drip",  title:"Peak Drip",  sub:"Кто самый стильный?" },
+      { id:"humor", title:"Peak Humor", sub:"Кто смешнее всех?" },
+      { id:"mc",    title:"Main Character", sub:"Кто главный герой?" },
+      { id:"iq",    title:"Peak IQ",    sub:"Кто самый умный?" },
+      { id:"rizz",  title:"Peak Rizz",  sub:"Кто харизматичнее всех?" },
     ];
 
-    // 2) ДРУЗЬЯ (имя + путь к фото)
-    //   Положи фотки в repo: /images/...
-    const NOMINEES = [
-      { name: "Иван",  img: "images/ivan.jpg" },
-      { name: "Маша",  img: "images/masha.jpg" },
-      { name: "Саша",  img: "images/sasha.jpg" },
-      { name: "Лера",  img: "images/lera.jpg" },
-      { name: "Дима",  img: "images/dima.jpg" },
-      { name: "Катя",  img: "images/katya.jpg" }
+    const PEOPLE = [
+      { name:"Ivan",  img:"https://images.unsplash.com/photo-1520975958225-1f2a2f1b63c5?auto=format&fit=crop&w=900&q=60" },
+      { name:"Masha", img:"https://images.unsplash.com/photo-1524503033411-c9566986fc8f?auto=format&fit=crop&w=900&q=60" },
+      { name:"Sasha", img:"https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=900&q=60" },
+      { name:"Lera",  img:"https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?auto=format&fit=crop&w=900&q=60" },
+      { name:"Dima",  img:"https://images.unsplash.com/photo-1520975661595-6453be3f7070?auto=format&fit=crop&w=900&q=60" },
+      { name:"Katya", img:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=60" },
     ];
 
-    /* =========================================================
-       2) ОТПРАВКА В GOOGLE TABLE через GOOGLE FORM
-       =========================================================
-       ТЫ ЗАМЕНИШЬ ЭТО после Шага 3 (entry IDs)
-       --------------------------------------------------------- */
+    /* ===== STATE ===== */
+    const chosen = {}; // categoryId -> personName
+    let activeCat = null;
+    let pendingPick = null;
 
-    // A) URL формы (formResponse)
-    const FORM_ACTION_URL = "PASTE_YOUR_FORM_RESPONSE_URL_HERE";
+    /* ===== UI ===== */
+    const catStrip = document.getElementById("catStrip");
+    const drawer = document.getElementById("drawer");
+    const peopleGrid = document.getElementById("peopleGrid");
+    const pillNom = document.getElementById("pillNom");
+    const pillChosen = document.getElementById("pillChosen");
+    const drawerTitle = document.getElementById("drawerTitle");
+    const drawerDesc = document.getElementById("drawerDesc");
+    const btnClose = document.getElementById("btnClose");
+    const btnConfirm = document.getElementById("btnConfirm");
 
-    // B) entry IDs
-    // voter — поле "Кто голосует?"
-    // categories — entry для каждого вопроса-номинации
-    const ENTRY = {
-      voter: "entry.1111111111",
-      categories: {
-        "Peak Aura": "entry.2222222222",
-        "Peak Drip": "entry.3333333333",
-        "Peak Humor": "entry.4444444444",
-        "Peak Main Character": "entry.5555555555",
-        "Peak IQ": "entry.6666666666"
-      }
-    };
-
-    /* =========================================================
-       3) ЗВУКИ (простые, но приятные)
-       ========================================================= */
-    let audioCtx = null;
-    function ensureAudio(){
-      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if(audioCtx.state === "suspended") audioCtx.resume();
+    function countChosen(){
+      return Object.keys(chosen).length;
     }
-    function beep(freq=740, dur=0.05, type="sine", gain=0.03){
-      try{
-        ensureAudio();
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        o.type = type;
-        o.frequency.value = freq;
-        g.gain.value = gain;
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start();
-        o.stop(audioCtx.currentTime + dur);
-      }catch{}
-    }
-    const sClick = ()=>beep(880,0.03,"triangle",0.02);
-    const sOk = ()=>{ beep(520,0.06,"triangle",0.03); setTimeout(()=>beep(780,0.08,"triangle",0.03),70); };
-    const sBad = ()=>beep(220,0.10,"sawtooth",0.03);
-
-    // активируем аудио после первого клика
-    window.addEventListener("pointerdown", () => ensureAudio(), { once:true });
-
-    /* =========================================================
-       4) UI + STATE
-       ========================================================= */
-    const el = (id)=>document.getElementById(id);
-
-    const scrBoot   = el("scrBoot");
-    const scrMenu   = el("scrMenu");
-    const scrVote   = el("scrVote");
-    const scrReview = el("scrReview");
-    const scrDone   = el("scrDone");
-
-    const pillStage = el("pillStage");
-    const pillProgress = el("pillProgress");
-
-    const infoStage = el("infoStage");
-    const infoVoter = el("infoVoter");
-    const infoProg  = el("infoProg");
-
-    const voterName = el("voterName");
-    const passcode  = el("passcode");
-    const btnStart  = el("btnStart");
-    const btnPreview= el("btnPreview");
-    const menuToast = el("menuToast");
-
-    const catTitle  = el("catTitle");
-    const catHint   = el("catHint");
-    const nomineeGrid = el("nomineeGrid");
-    const btnBack   = el("btnBack");
-    const btnNext   = el("btnNext");
-    const voteToast = el("voteToast");
-    const voteBar   = el("voteBar");
-
-    const reviewList= el("reviewList");
-    const btnEdit   = el("btnEdit");
-    const btnSend   = el("btnSend");
-    const sendToast = el("sendToast");
-
-    const btnAgain  = el("btnAgain");
-
-    const bootBar   = el("bootBar");
-    const bootText  = el("bootText");
-    const headerSub = el("headerSub");
-
-    const SCREENS = [scrBoot, scrMenu, scrVote, scrReview, scrDone];
-
-    let state = {
-      voter: "",
-      catIndex: 0,
-      choices: {} // { category: nomineeName }
-    };
-
-    function setStage(name){
-      pillStage.textContent = `Stage: ${name}`;
-      infoStage.textContent = name;
-      headerSub.textContent = name;
-    }
-    function setProg(text){
-      pillProgress.textContent = text;
-      infoProg.textContent = text;
-    }
-    function setVoter(name){
-      infoVoter.textContent = name || "—";
+    function updateTop(){
+      pillNom.textContent = activeCat ? activeCat.title : "—";
+      pillChosen.textContent = String(countChosen());
     }
 
-    function showScreen(screenEl){
-      SCREENS.forEach(s=>s.classList.remove("active"));
-      screenEl.classList.add("active");
+    function renderCategories(){
+      catStrip.innerHTML = "";
+      CATEGORIES.forEach((c, idx)=>{
+        const el = document.createElement("div");
+        el.className = "cat" + (activeCat && activeCat.id===c.id ? " active":"");
+        el.innerHTML = `
+          <div class="medal">${idx+1}</div>
+          <div class="catText">
+            <b>${c.title}</b>
+            <span>${c.sub}</span>
+          </div>
+        `;
+        el.addEventListener("click", ()=>{
+          openCategory(c);
+          document.querySelectorAll(".cat").forEach(x=>x.classList.remove("active"));
+          el.classList.add("active");
+        });
+        catStrip.appendChild(el);
+      });
     }
 
-    function toast(node, msg, type=""){
-      node.className = "toast show" + (type ? " "+type : "");
-      node.textContent = msg;
-    }
-    function hideToast(node){
-      node.className = "toast";
-      node.textContent = "";
-    }
+    function renderPeople(){
+      peopleGrid.innerHTML = "";
+      pendingPick = null;
+      btnConfirm.disabled = true;
 
-    /* =========================================================
-       5) BOOT ANIMATION
-       ========================================================= */
-    function boot(){
-      setStage("Boot");
-      setProg("—");
-      setVoter("");
-      showScreen(scrBoot);
+      const already = activeCat ? chosen[activeCat.id] : null;
 
-      const lines = [
-        "summoning the fog…",
-        "polishing the crest…",
-        "preparing nominations…",
-        "ready ✦"
-      ];
-
-      let i = 0;
-      bootBar.style.width = "0%";
-      toast(bootText, lines[0]);
-
-      const int = setInterval(()=>{
-        const pct = Math.min(100, (i+1)/lines.length * 100);
-        bootBar.style.width = pct.toFixed(0) + "%";
-        toast(bootText, lines[i] || "…");
-        i++;
-
-        if(i >= lines.length){
-          clearInterval(int);
-          setTimeout(()=>{
-            showMenu();
-          }, 500);
-        }
-      }, 500);
-    }
-
-    /* =========================================================
-       6) MENU
-       ========================================================= */
-    function showMenu(){
-      setStage("Menu");
-      setProg(`${CATEGORIES.length} nominations`);
-      showScreen(scrMenu);
-      hideToast(menuToast);
-      btnStart.disabled = false;
-    }
-
-    btnPreview.addEventListener("click", ()=>{
-      sClick();
-      const txt = "Номинации:\n- " + CATEGORIES.join("\n- ");
-      toast(menuToast, txt);
-    });
-
-    btnStart.addEventListener("click", ()=>{
-      sClick();
-      const name = voterName.value.trim();
-      if(!name){
-        sBad();
-        toast(menuToast, "Введи ник, чтобы голос был подписан.", "bad");
-        return;
-      }
-      state.voter = name;
-      state.catIndex = 0;
-      state.choices = {};
-      setVoter(name);
-      startVoting();
-    });
-
-    /* =========================================================
-       7) VOTE SCREEN
-       ========================================================= */
-    function startVoting(){
-      setStage("Voting");
-      renderCategory();
-      showScreen(scrVote);
-    }
-
-    function renderCategory(){
-      hideToast(voteToast);
-
-      const cat = CATEGORIES[state.catIndex];
-      catTitle.textContent = cat;
-      catHint.textContent = "Выбери одного человека.";
-
-      const done = Object.keys(state.choices).length;
-      setProg(`${done}/${CATEGORIES.length}`);
-      voteBar.style.width = (done / CATEGORIES.length * 100).toFixed(0) + "%";
-
-      nomineeGrid.innerHTML = "";
-      btnNext.disabled = !state.choices[cat];
-
-      NOMINEES.forEach(n=>{
+      PEOPLE.forEach((p, i)=>{
         const card = document.createElement("div");
-        card.className = "card" + (state.choices[cat] === n.name ? " selected" : "");
+        card.className = "knightCard" + (already===p.name ? " selected":"");
         card.innerHTML = `
-          <img src="${n.img}" alt="${n.name}" onerror="this.style.opacity=.15; this.style.filter='grayscale(1)';">
-          <div class="meta">
-            <div class="name">${escapeHtml(n.name)}</div>
-            <div class="sigil">✦</div>
+          <div class="portrait">
+            <img src="${p.img}" alt="${p.name}">
+            <div class="banner">
+              <div class="shield">${String.fromCharCode(65+i)}</div>
+              <b>${p.name}</b>
+            </div>
+          </div>
+          <div class="knightMeta">
+            <div class="hint">Tap to choose</div>
+            <div class="crown">♛</div>
           </div>
         `;
         card.addEventListener("click", ()=>{
-          sClick();
-          state.choices[cat] = n.name;
-          // перерендер
-          renderCategory();
-          btnNext.disabled = false;
+          pendingPick = p.name;
+          btnConfirm.disabled = false;
+          // selection UI
+          [...peopleGrid.children].forEach(x=>x.classList.remove("selected"));
+          card.classList.add("selected");
         });
-        nomineeGrid.appendChild(card);
-      });
 
-      btnBack.disabled = state.catIndex === 0;
-    }
-
-    btnBack.addEventListener("click", ()=>{
-      sClick();
-      if(state.catIndex > 0){
-        state.catIndex--;
-        renderCategory();
-      }
-    });
-
-    btnNext.addEventListener("click", ()=>{
-      sClick();
-      const cat = CATEGORIES[state.catIndex];
-      if(!state.choices[cat]){
-        sBad();
-        toast(voteToast, "Сначала выбери человека.", "bad");
-        return;
-      }
-      if(state.catIndex < CATEGORIES.length - 1){
-        state.catIndex++;
-        renderCategory();
-      } else {
-        showReview();
-      }
-    });
-
-    /* =========================================================
-       8) REVIEW SCREEN
-       ========================================================= */
-    function showReview(){
-      setStage("Review");
-      setProg(`ready to send`);
-      showScreen(scrReview);
-      hideToast(sendToast);
-
-      reviewList.innerHTML = "";
-      CATEGORIES.forEach(cat=>{
-        const who = state.choices[cat] || "—";
-        const row = document.createElement("div");
-        row.className = "rowItem fadeIn";
-        row.innerHTML = `
-          <div>
-            <div style="font-weight:900">${escapeHtml(cat)}</div>
-            <div class="tiny">${escapeHtml(who)}</div>
-          </div>
-          <div class="sigil">⚔︎</div>
-        `;
-        reviewList.appendChild(row);
+        peopleGrid.appendChild(card);
       });
     }
 
-    btnEdit.addEventListener("click", ()=>{
-      sClick();
-      setStage("Voting");
-      showScreen(scrVote);
-      renderCategory();
+    function openCategory(c){
+      activeCat = c;
+      drawerTitle.textContent = "Choose a Champion";
+      drawerDesc.textContent = `Номинация: ${c.title}`;
+      updateTop();
+      renderPeople();
+      drawer.classList.add("open");
+      // маленький эффект "скрежет меча" — пока без звука
+      // позже подключим звук металла
+    }
+
+    btnClose.addEventListener("click", ()=>{
+      drawer.classList.remove("open");
+      pendingPick = null;
+      btnConfirm.disabled = true;
     });
 
-    /* =========================================================
-       9) SEND TO GOOGLE FORM (GOOGLE SHEET)
-       ========================================================= */
-    function validateFormConfig(){
-      if(!FORM_ACTION_URL || FORM_ACTION_URL.includes("PASTE_")) return false;
-      if(!ENTRY.voter || !ENTRY.voter.startsWith("entry.")) return false;
-      for(const cat of CATEGORIES){
-        const e = ENTRY.categories[cat];
-        if(!e || !String(e).startsWith("entry.")) return false;
-      }
-      return true;
-    }
-
-    async function sendVoteToSheet(){
-      // собираем данные под Google Form
-      const fd = new FormData();
-      fd.append(ENTRY.voter, state.voter);
-
-      for(const cat of CATEGORIES){
-        fd.append(ENTRY.categories[cat], state.choices[cat] || "");
-      }
-
-      // Важно: no-cors, потому что Google Forms не даёт CORS
-      await fetch(FORM_ACTION_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: fd
-      });
-    }
-
-    btnSend.addEventListener("click", async ()=>{
-      sClick();
-      btnSend.disabled = true;
-
-      if(!validateFormConfig()){
-        sBad();
-        toast(sendToast,
-          "Нужно вставить FORM_ACTION_URL и entry.* IDs из Google Form.\nСделай Шаг 3–4.",
-          "bad"
-        );
-        btnSend.disabled = false;
-        return;
-      }
-
-      toast(sendToast, "Отправляем…");
-      try{
-        await sendVoteToSheet();
-        sOk();
-        toast(sendToast, "Отправлено ✦ Проверь Google Таблицу (вкладка Ответы).", "ok");
-        setTimeout(()=>showDone(), 700);
-      } catch(e){
-        sBad();
-        toast(sendToast, "Не получилось отправить. Попробуй ещё раз.", "bad");
-        btnSend.disabled = false;
-      }
+    btnConfirm.addEventListener("click", ()=>{
+      if(!activeCat || !pendingPick) return;
+      chosen[activeCat.id] = pendingPick;
+      updateTop();
+      btnConfirm.disabled = true;
+      pendingPick = null;
+      // оставляем drawer открытым — чтобы можно было быстро поменять
+      renderPeople();
     });
 
-    function showDone(){
-      setStage("Done");
-      setProg("sent");
-      showScreen(scrDone);
-    }
-
-    btnAgain.addEventListener("click", ()=>{
-      sClick();
-      // новая сессия голосования
-      state.catIndex = 0;
-      state.choices = {};
-      showMenu();
-    });
-
-    /* =========================================================
-       utils
-       ========================================================= */
-    function escapeHtml(s){
-      return (s||"").replace(/[&<>"']/g, c => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[c]));
-    }
-
-    /* старт */
-    boot();
+    // init
+    renderCategories();
+    updateTop();
   </script>
 </body>
 </html>

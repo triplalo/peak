@@ -1,802 +1,1049 @@
-<!doctype html>
-<html lang="ru">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>PEAK — Royal Vote</title>
-
-  <!-- Medieval fonts -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚔ PEAK ⚔</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;600;800&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDK (needed only if you enable shared voting) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 
   <style>
+    /* ══════════ RESET & VARIABLES ══════════ */
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
     :root{
-      --bg:#07090b;
-      --mist:#f3f6ff;
-      --ink:#0b0f14;
-
-      --paper: rgba(245, 240, 226, .92);
-      --paper2: rgba(245, 240, 226, .78);
-
-      --steel1:#e7eef8;
-      --steel2:#90a4bf;
-
-      --gold1:#f7e7b1;
-      --gold2:#caa24c;
-
-      --wine:#5b2030;
-      --emerald:#1b6b46;
-
-      --line: rgba(255,255,255,.16);
-      --shadow: 0 28px 80px rgba(0,0,0,.55);
-      --soft: 0 18px 55px rgba(0,0,0,.35);
-
-      --r: 22px;
-      --r2: 18px;
+      --bg:#ddd8ce;
+      --bg-light:#eae5db;
+      --bg-card:rgba(248,245,238,.92);
+      --text:#1a1814;
+      --text-dim:#6b6560;
+      --accent:#8a7d6b;
+      --gold:#c4a55a;
+      --gold-soft:rgba(196,165,90,.12);
+      --border:#c4bfb5;
+      --white:#faf7f2;
+      --shadow:0 4px 24px rgba(0,0,0,.07);
+      --shadow-lg:0 8px 40px rgba(0,0,0,.11);
+      --font-display:'Cinzel Decorative',serif;
+      --font-head:'Cinzel',serif;
+      --font-body:'Cormorant Garamond','Georgia',serif;
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    html{scroll-behavior:smooth}
+
     body{
-      margin:0;
-      color:#f7f7fb;
-      overflow:hidden;
+      font-family:var(--font-body);
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    /* ══════════ FOG ══════════ */
+    #fog{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+    #fog div{position:absolute;width:200%;height:100%}
+    .fog-a{
       background:
-        radial-gradient(1400px 900px at 50% 30%, rgba(40,60,85,.26), transparent 60%),
-        radial-gradient(1000px 700px at 20% 70%, rgba(45,25,35,.22), transparent 62%),
-        radial-gradient(900px 700px at 80% 75%, rgba(25,75,55,.16), transparent 60%),
-        linear-gradient(180deg, #050608, #0b0e13 70%, #050608);
-      font-family: "IM Fell English", serif;
+        radial-gradient(ellipse at 25% 50%,rgba(255,255,255,.65) 0%,transparent 55%),
+        radial-gradient(ellipse at 80% 25%,rgba(255,255,255,.45) 0%,transparent 45%);
+      animation:fA 28s ease-in-out infinite;
     }
-
-    /* castle silhouette + fog layers (pure CSS, no images yet) */
-    .sky{
-      position:fixed; inset:0;
+    .fog-b{
       background:
-        radial-gradient(1200px 700px at 50% 18%, rgba(255,255,255,.08), transparent 60%),
-        radial-gradient(900px 600px at 20% 20%, rgba(255,255,255,.06), transparent 55%),
-        radial-gradient(900px 600px at 80% 24%, rgba(255,255,255,.05), transparent 55%);
-      pointer-events:none;
+        radial-gradient(ellipse at 65% 70%,rgba(255,255,255,.55) 0%,transparent 50%),
+        radial-gradient(ellipse at 20% 20%,rgba(255,255,255,.35) 0%,transparent 42%);
+      animation:fB 36s ease-in-out infinite;
+    }
+    .fog-c{
+      background:radial-gradient(ellipse at 50% 50%,rgba(240,235,225,.75) 0%,transparent 38%);
+      animation:fC 22s ease-in-out infinite;
+    }
+    @keyframes fA{0%,100%{transform:translateX(0) translateY(0)}50%{transform:translateX(-12%) translateY(2%)}}
+    @keyframes fB{0%,100%{transform:translateX(-5%) translateY(0)}50%{transform:translateX(8%) translateY(-3%)}}
+    @keyframes fC{0%,100%{transform:scale(1);opacity:.25}50%{transform:scale(1.35);opacity:.55}}
+
+    /* ══════════ VIGNETTE ══════════ */
+    #vignette{
+      position:fixed;inset:0;
+      background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.18) 100%);
+      pointer-events:none;z-index:2;
     }
 
-    .castle{
-      position:fixed; left:0; right:0; bottom:-10px; height:42vh;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0), rgba(0,0,0,.65)),
-        repeating-linear-gradient(
-          to right,
-          rgba(0,0,0,.0),
-          rgba(0,0,0,.0) 18px,
-          rgba(0,0,0,.08) 18px,
-          rgba(0,0,0,.08) 22px
-        );
-      mask-image: radial-gradient(900px 380px at 50% 40%, black 60%, transparent 100%);
-      opacity:.55;
-      pointer-events:none;
+    /* ══════════ GRAIN TEXTURE ══════════ */
+    body::after{
+      content:'';position:fixed;inset:0;
+      opacity:.025;pointer-events:none;z-index:3;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat:repeat;background-size:256px 256px;
     }
 
-    .fog{
-      position:fixed; inset:-40px;
-      background:
-        radial-gradient(700px 240px at 20% 65%, rgba(255,255,255,.10), transparent 70%),
-        radial-gradient(720px 260px at 60% 60%, rgba(255,255,255,.08), transparent 72%),
-        radial-gradient(680px 240px at 85% 68%, rgba(255,255,255,.09), transparent 72%),
-        radial-gradient(900px 360px at 50% 90%, rgba(255,255,255,.08), transparent 75%);
-      filter: blur(12px);
-      opacity: .95;
-      animation: fogMove 16s ease-in-out infinite;
-      pointer-events:none;
-      mix-blend-mode: screen;
-    }
-    @keyframes fogMove{
-      0%{ transform: translate3d(0,0,0) scale(1.02); }
-      50%{ transform: translate3d(-16px,8px,0) scale(1.06); }
-      100%{ transform: translate3d(0,0,0) scale(1.02); }
-    }
-
-    /* Layout */
-    .wrap{
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      padding:16px;
-      max-width:1200px;
-      margin:0 auto;
-      position:relative;
-    }
-
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:14px 16px;
-      border:1px solid var(--line);
-      border-radius: var(--r);
-      background: linear-gradient(180deg, rgba(10,14,18,.62), rgba(10,14,18,.35));
-      backdrop-filter: blur(8px);
-      box-shadow: var(--soft);
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width: 240px;
-    }
-
-    .crest{
-      width:44px; height:44px; border-radius:14px;
-      background:
-        radial-gradient(circle at 30% 25%, rgba(255,255,255,.85), rgba(255,255,255,.16) 55%),
-        linear-gradient(180deg, rgba(215,180,90,.45), rgba(90,70,30,.18));
-      border:1px solid rgba(245,230,180,.35);
-      box-shadow: 0 18px 40px rgba(0,0,0,.35), inset 0 0 0 2px rgba(255,255,255,.08);
-      display:grid;
-      place-items:center;
-      position:relative;
-    }
-    .crest:before{
-      content:"♛";
-      font-family: "Cinzel", serif;
-      font-weight: 800;
-      color: rgba(245,231,177,.95);
-      text-shadow: 0 10px 26px rgba(202,162,76,.22);
-      transform: translateY(-1px);
-      font-size: 22px;
-    }
-
-    .titles{
-      display:flex; flex-direction:column; gap:2px;
-    }
-    .titles .t1{
-      font-family: "Cinzel", serif;
-      font-weight: 800;
-      letter-spacing: .8px;
-      font-size: 16px;
-      text-transform: uppercase;
-    }
-    .titles .t2{
-      font-size: 12px;
-      color: rgba(255,255,255,.72);
-    }
-
-    .meta{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .pill{
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(10,14,18,.45);
-      font-size:12px;
-      color: rgba(255,255,255,.78);
-      backdrop-filter: blur(8px);
-      display:flex; gap:8px; align-items:center;
-      white-space: nowrap;
-    }
-    .pill b{ color: rgba(245,231,177,.95); font-weight: 800; }
-
-    /* Main area: stage + drawer */
-    .stage{
-      flex:1;
-      display:grid;
-      grid-template-columns: 1fr 0.9fr;
-      gap:14px;
-      align-items:stretch;
-      min-height: 0;
-    }
-    @media (max-width: 980px){
-      .stage{ grid-template-columns: 1fr; }
-    }
-
-    .panel{
-      border:1px solid rgba(255,255,255,.16);
-      border-radius: var(--r);
-      background: linear-gradient(180deg, rgba(10,14,18,.62), rgba(10,14,18,.30));
-      backdrop-filter: blur(8px);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      position:relative;
-      min-height: 0;
-    }
-
-    .panelHead{
-      padding:14px 16px;
-      border-bottom:1px solid rgba(255,255,255,.14);
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
-    .panelHead .name{
-      font-family:"Cinzel", serif;
-      font-weight:800;
-      letter-spacing:.7px;
-      text-transform:uppercase;
-      font-size: 13px;
-      color: rgba(245,231,177,.92);
-    }
-    .panelHead .desc{
-      font-size: 12px;
-      color: rgba(255,255,255,.70);
-    }
-
-    /* “Parchment” inside */
-    .scroll{
-      margin:14px;
-      border-radius: 18px;
-      border:1px solid rgba(245,231,177,.26);
-      background:
-        radial-gradient(900px 280px at 30% 10%, rgba(255,255,255,.40), transparent 60%),
-        linear-gradient(180deg, var(--paper), var(--paper2));
-      color: var(--ink);
-      box-shadow: 0 18px 50px rgba(0,0,0,.35);
-      padding:14px;
-      position:relative;
-      overflow:hidden;
-    }
-    .scroll:before, .scroll:after{
-      content:"";
+    /* ══════════ PARTICLES ══════════ */
+    .particles{position:fixed;inset:0;pointer-events:none;z-index:2}
+    .particle{
       position:absolute;
-      width:130px; height:130px;
-      background: radial-gradient(circle at 30% 30%, rgba(202,162,76,.35), transparent 70%);
-      filter: blur(2px);
-      opacity:.7;
+      background:rgba(170,160,145,.35);
+      border-radius:50%;
+      animation:floatP linear infinite;
     }
-    .scroll:before{ left:-44px; top:-44px; }
-    .scroll:after{ right:-52px; bottom:-52px; }
-
-    .scrollTitle{
-      font-family:"Cinzel", serif;
-      font-weight:800;
-      letter-spacing:.6px;
-      text-transform:uppercase;
-      font-size:14px;
-      margin-bottom:8px;
-    }
-    .scrollSub{
-      color: rgba(11,15,20,.74);
-      font-size: 13px;
-      line-height: 1.35;
+    @keyframes floatP{
+      0%{transform:translateY(100vh) rotate(0);opacity:0}
+      8%{opacity:.6}
+      92%{opacity:.6}
+      100%{transform:translateY(-8vh) rotate(360deg);opacity:0}
     }
 
-    /* Bottom category strip */
-    .bottomBar{
-      border:1px solid rgba(255,255,255,.16);
-      border-radius: var(--r);
-      background: linear-gradient(180deg, rgba(10,14,18,.60), rgba(10,14,18,.34));
-      backdrop-filter: blur(8px);
-      box-shadow: var(--soft);
-      padding:12px 12px 10px;
-      overflow:hidden;
+    /* ══════════ CONTENT LAYER ══════════ */
+    .content{position:relative;z-index:10}
+
+    /* ══════════ DECORATIVE DIVIDER ══════════ */
+    .divider{
+      display:flex;align-items:center;gap:1rem;
+      margin:1.5rem 0;color:var(--accent);font-size:1.2rem;
+    }
+    .divider::before,.divider::after{
+      content:'';height:1px;width:90px;
+      background:linear-gradient(to var(--dir,right),transparent,var(--border),transparent);
+    }
+    .divider::after{--dir:left}
+
+    /* ══════════════════════════════════════
+                LOGIN SCREEN
+       ══════════════════════════════════════ */
+    #login-screen{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      min-height:100vh;text-align:center;padding:2rem;
     }
 
-    .catStrip{
-      display:flex;
-      gap:10px;
-      overflow:auto;
-      padding-bottom:6px;
-      scrollbar-width: thin;
-    }
-    .catStrip::-webkit-scrollbar{ height:8px; }
-    .catStrip::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.18); border-radius:999px; }
+    .logo-crown{font-size:3rem;margin-bottom:.5rem;opacity:.6;animation:crownFloat 5s ease-in-out infinite}
+    @keyframes crownFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
-    .cat{
-      flex:0 0 auto;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      cursor:pointer;
-      transition: .14s;
-      user-select:none;
-      min-width: 210px;
+    .logo-title{
+      font-family:var(--font-display);
+      font-size:clamp(4rem,13vw,10rem);
+      font-weight:900;
+      letter-spacing:.18em;
+      color:var(--text);
+      text-shadow:0 0 60px rgba(255,255,255,.5),0 0 120px rgba(255,255,255,.25),0 2px 0 var(--border);
+      animation:breathe 4.5s ease-in-out infinite;
+      line-height:1;
     }
-    .cat:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); }
-    .cat.active{
-      outline: 2px solid rgba(245,231,177,.26);
-      background: rgba(245,231,177,.08);
+    @keyframes breathe{
+      0%,100%{text-shadow:0 0 60px rgba(255,255,255,.5),0 0 120px rgba(255,255,255,.25),0 2px 0 var(--border)}
+      50%{text-shadow:0 0 90px rgba(255,255,255,.7),0 0 160px rgba(255,255,255,.35),0 2px 0 var(--border)}
     }
 
-    .medal{
-      width:34px; height:34px; border-radius:12px;
-      border:1px solid rgba(245,231,177,.30);
-      background:
-        radial-gradient(circle at 30% 25%, rgba(255,255,255,.78), rgba(245,231,177,.14) 60%),
-        linear-gradient(180deg, rgba(202,162,76,.42), rgba(20,24,30,.08));
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,.07);
-      display:grid; place-items:center;
-      color: rgba(245,231,177,.95);
-      font-family:"Cinzel", serif;
-      font-weight: 800;
+    .logo-sub{
+      font-family:var(--font-head);
+      font-size:clamp(.95rem,2.8vw,1.5rem);
+      letter-spacing:.45em;text-transform:uppercase;
+      color:var(--text-dim);margin-top:.3rem;
     }
 
-    .catText{
-      display:flex; flex-direction:column;
-      gap:2px;
-      line-height:1.1;
-    }
-    .catText b{
-      font-family:"Cinzel", serif;
-      font-weight:800;
-      font-size: 12px;
-      letter-spacing:.5px;
-      text-transform:uppercase;
-    }
-    .catText span{
-      font-size: 12px;
-      color: rgba(255,255,255,.70);
+    .login-quote{
+      max-width:420px;color:var(--text-dim);
+      font-size:1.15rem;font-style:italic;margin-bottom:2.2rem;
+      line-height:1.6;
     }
 
-    /* ===== Sword Drawer ===== */
-    .drawerWrap{
-      position:relative;
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
+    /* Discord button */
+    .btn-discord{
+      display:inline-flex;align-items:center;gap:12px;
+      padding:16px 44px;background:#5865F2;color:#fff;
+      border:none;border-radius:5px;
+      font-family:var(--font-head);font-size:1.05rem;font-weight:700;
+      letter-spacing:.08em;cursor:pointer;transition:all .3s;text-decoration:none;
     }
+    .btn-discord:hover{
+      background:#4752c4;transform:translateY(-2px);
+      box-shadow:0 8px 28px rgba(88,101,242,.35);
+    }
+    .btn-discord svg{width:22px;height:22px;fill:#fff;flex-shrink:0}
 
-    .drawer{
-      position:absolute;
-      inset:0;
-      transform: translateX(105%);
-      transition: transform .38s cubic-bezier(.2,.9,.2,1);
-      display:flex;
-      flex-direction:column;
+    /* Guest option */
+    .btn-guest{
+      display:inline-block;margin-top:1rem;padding:10px 32px;
+      background:transparent;color:var(--text-dim);
+      border:1px solid var(--border);border-radius:5px;
+      font-family:var(--font-head);font-size:.85rem;letter-spacing:.1em;
+      cursor:pointer;transition:all .3s;
     }
-    .drawer.open{
-      transform: translateX(0);
-    }
+    .btn-guest:hover{background:var(--bg-card);color:var(--text)}
 
-    /* sword visual on left edge of drawer */
-    .sword{
-      position:absolute;
-      left:-84px;
-      top:84px;
-      width: 140px;
-      height: 420px;
-      transform: rotate(-18deg);
-      opacity:0;
-      transition: opacity .18s ease, transform .38s cubic-bezier(.2,.9,.2,1);
-      filter: drop-shadow(0 18px 30px rgba(0,0,0,.55));
-      pointer-events:none;
+    #guest-box{display:none;margin-top:1.5rem;text-align:center}
+    #guest-box input{
+      padding:12px 20px;border:1px solid var(--border);
+      background:var(--bg-card);font-family:var(--font-body);
+      font-size:1.1rem;color:var(--text);border-radius:5px;
+      outline:none;width:260px;text-align:center;
     }
-    .drawer.open .sword{
-      opacity:1;
-      transform: rotate(-10deg) translateX(-8px);
+    #guest-box input:focus{border-color:var(--accent)}
+    #guest-box button{
+      margin-top:.8rem;padding:10px 32px;
+      background:var(--accent);color:var(--white);border:none;
+      font-family:var(--font-head);font-size:.95rem;letter-spacing:.1em;
+      cursor:pointer;border-radius:5px;transition:background .3s;display:block;
+      margin-left:auto;margin-right:auto;
     }
+    #guest-box button:hover{background:var(--gold)}
 
-    /* Sword parts */
-    .blade{
-      position:absolute;
-      left:52px;
-      top:0;
-      width:20px;
-      height:310px;
-      border-radius: 14px;
-      background: linear-gradient(180deg, rgba(231,238,248,.95), rgba(144,164,191,.55));
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,.15);
-      overflow:hidden;
-    }
-    .blade:after{
-      content:"";
-      position:absolute; inset:-40px;
-      background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,.55), transparent 60%);
-      transform: translateY(-60px);
-      animation: shine 2.6s ease-in-out infinite;
-      opacity:.55;
-    }
-    @keyframes shine{
-      0%{ transform: translateY(-120px); opacity:.0; }
-      35%{ opacity:.55; }
-      65%{ opacity:.35; }
-      100%{ transform: translateY(380px); opacity:.0; }
-    }
-    .guard{
-      position:absolute;
-      left:28px;
-      top:306px;
-      width:68px;
-      height:12px;
-      border-radius: 999px;
-      background: linear-gradient(180deg, rgba(247,231,177,.9), rgba(202,162,76,.55));
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,.10);
-    }
-    .hilt{
-      position:absolute;
-      left:54px;
-      top:318px;
-      width:16px;
-      height:58px;
-      border-radius: 999px;
-      background: linear-gradient(180deg, rgba(90,32,48,.85), rgba(30,16,22,.85));
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,.08);
-    }
-    .pommel{
-      position:absolute;
-      left:48px;
-      top:372px;
-      width:28px;
-      height:28px;
-      border-radius: 12px;
-      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.55), rgba(202,162,76,.55));
-      border:1px solid rgba(245,231,177,.25);
-      box-shadow: 0 18px 30px rgba(0,0,0,.30), inset 0 0 0 2px rgba(255,255,255,.08);
-    }
+    /* ══════════════════════════════════════
+                  MAIN APP
+       ══════════════════════════════════════ */
+    #app{display:none;min-height:100vh}
 
-    /* Drawer content */
-    .drawerInner{
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      padding-left: 0;
+    /* Header */
+    .app-header{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:1rem 2rem;
+      background:var(--bg-card);border-bottom:1px solid var(--border);
+      backdrop-filter:blur(12px);
+      position:sticky;top:0;z-index:100;
     }
-
-    .drawerBody{
-      padding:14px 14px 16px;
-      display:grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap:10px;
-      overflow:auto;
-      min-height:0;
+    .hdr-brand{
+      font-family:var(--font-display);font-size:1.6rem;font-weight:700;letter-spacing:.1em;
     }
-    @media (max-width: 980px){
-      .drawerBody{ grid-template-columns: 1fr; }
-    }
-
-    .knightCard{
-      border-radius: 18px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      cursor:pointer;
-      transition:.15s;
-      user-select:none;
-      box-shadow: 0 18px 44px rgba(0,0,0,.30);
-    }
-    .knightCard:hover{ transform: translateY(-2px); background: rgba(255,255,255,.09); }
-    .knightCard.selected{
-      outline: 2px solid rgba(245,231,177,.30);
-      box-shadow: 0 0 0 6px rgba(245,231,177,.10), 0 18px 44px rgba(0,0,0,.32);
-    }
-    .portrait{
-      height:150px;
-      background:
-        radial-gradient(900px 220px at 20% 10%, rgba(255,255,255,.12), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.22));
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      padding:12px;
-      position:relative;
-    }
-    .portrait img{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
+    .hdr-user{display:flex;align-items:center;gap:10px}
+    .hdr-user img{
+      width:34px;height:34px;border-radius:50%;border:2px solid var(--border);
       object-fit:cover;
-      opacity:.95;
-      filter: contrast(1.05) saturate(1.05);
     }
-    .portrait:after{
-      content:"";
-      position:absolute; inset:0;
-      background: radial-gradient(900px 280px at 30% 10%, rgba(255,255,255,.18), transparent 60%),
-                  linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.46));
-      pointer-events:none;
+    .hdr-user span{font-family:var(--font-head);font-size:.92rem;font-weight:600}
+    .btn-out{
+      padding:5px 14px;background:transparent;
+      border:1px solid var(--border);color:var(--text-dim);
+      font-family:var(--font-head);font-size:.78rem;letter-spacing:.05em;
+      cursor:pointer;border-radius:4px;transition:all .3s;
+    }
+    .btn-out:hover{background:var(--text);color:var(--white)}
+
+    /* Nav Tabs */
+    .nav-tabs{
+      display:flex;justify-content:center;
+      background:var(--bg-light);border-bottom:1px solid var(--border);
+    }
+    .nav-tab{
+      padding:1rem 2.5rem;
+      font-family:var(--font-head);font-size:.95rem;font-weight:700;
+      letter-spacing:.15em;text-transform:uppercase;
+      color:var(--text-dim);background:transparent;border:none;
+      border-bottom:3px solid transparent;cursor:pointer;transition:all .3s;
+    }
+    .nav-tab:hover{color:var(--text)}
+    .nav-tab.active{color:var(--text);border-bottom-color:var(--gold)}
+
+    /* Section */
+    .section{max-width:1100px;margin:0 auto;padding:3rem 2rem}
+    .sec-title{
+      font-family:var(--font-display);font-size:2rem;text-align:center;margin-bottom:.4rem;
+    }
+    .sec-desc{
+      text-align:center;color:var(--text-dim);font-size:1.15rem;
+      font-style:italic;margin-bottom:2.5rem;
     }
 
-    .banner{
-      position:relative;
-      display:flex; align-items:center; gap:10px;
-      z-index:1;
+    /* Progress bar */
+    .progress-wrap{
+      max-width:400px;margin:0 auto 2.5rem;text-align:center;
     }
-    .shield{
-      width:34px;height:34px;border-radius:12px;
-      background: linear-gradient(180deg, rgba(231,238,248,.90), rgba(144,164,191,.45));
-      border:1px solid rgba(255,255,255,.16);
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,.08);
-      display:grid; place-items:center;
-      font-family:"Cinzel", serif;
-      color: rgba(245,231,177,.95);
-      font-weight: 900;
+    .progress-text{
+      font-family:var(--font-head);font-size:.85rem;color:var(--text-dim);
+      letter-spacing:.1em;margin-bottom:.5rem;
     }
-    .banner b{
-      font-family:"Cinzel", serif;
-      font-weight:800;
-      letter-spacing:.5px;
-      text-transform:uppercase;
-      font-size: 12px;
-      text-shadow: 0 18px 40px rgba(0,0,0,.45);
+    .progress-bar-bg{
+      height:6px;background:var(--border);border-radius:3px;overflow:hidden;
+    }
+    .progress-bar-fill{
+      height:100%;background:linear-gradient(to right,var(--accent),var(--gold));
+      border-radius:3px;transition:width .5s ease;
     }
 
-    .knightMeta{
-      padding:10px 12px 12px;
-      color: rgba(255,255,255,.78);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .knightMeta .hint{
-      font-size:12px;
-      color: rgba(255,255,255,.66);
-    }
-    .crown{
-      color: rgba(245,231,177,.95);
-      text-shadow: 0 12px 28px rgba(202,162,76,.25);
-      font-size: 14px;
+    /* ══════════ CATEGORY CARDS ══════════ */
+    .cat-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+      gap:1.5rem;
     }
 
-    .drawerFooter{
-      padding:12px 14px 14px;
-      border-top: 1px solid rgba(255,255,255,.12);
-      display:flex;
-      gap:10px;
-      justify-content:flex-end;
-      flex-wrap:wrap;
+    .cat-card{
+      background:var(--bg-card);
+      border:1px solid var(--border);border-radius:10px;
+      padding:2rem 1.8rem;
+      cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;
+    }
+    /* corner ornaments */
+    .cat-card::before,.cat-card::after{
+      content:'';position:absolute;
+      width:22px;height:22px;
+      border-color:var(--gold);border-style:solid;
+      opacity:0;transition:opacity .35s;
+    }
+    .cat-card::before{top:10px;left:10px;border-width:2px 0 0 2px}
+    .cat-card::after{bottom:10px;right:10px;border-width:0 2px 2px 0}
+    .cat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+    .cat-card:hover::before,.cat-card:hover::after{opacity:1}
+
+    .cat-card.voted{border-color:var(--gold);background:linear-gradient(135deg,var(--bg-card),var(--gold-soft))}
+
+    .cat-card .badge-voted{
+      position:absolute;top:14px;right:16px;
+      font-family:var(--font-head);font-size:.7rem;font-weight:700;
+      letter-spacing:.1em;text-transform:uppercase;
+      color:var(--gold);opacity:0;transition:opacity .3s;
+    }
+    .cat-card.voted .badge-voted{opacity:1}
+
+    .cat-icon{font-size:2.6rem;margin-bottom:.7rem}
+    .cat-title{font-family:var(--font-head);font-size:1.25rem;font-weight:700;margin-bottom:.3rem}
+    .cat-desc{color:var(--text-dim);font-size:1rem;font-style:italic}
+    .cat-your-pick{
+      margin-top:.7rem;font-family:var(--font-head);
+      font-size:.88rem;color:var(--gold);
     }
 
-    .btn{
-      padding:10px 12px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.08);
-      color: rgba(255,255,255,.90);
-      cursor:pointer;
-      transition: .14s;
-      font-family:"Cinzel", serif;
-      font-weight: 800;
-      letter-spacing: .6px;
-      text-transform: uppercase;
-      font-size: 12px;
-      user-select:none;
+    /* ══════════ MODAL ══════════ */
+    .modal-bg{
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,.45);
+      backdrop-filter:blur(5px);
+      z-index:1000;justify-content:center;align-items:center;padding:1rem;
     }
-    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.11); }
-    .btn.primary{
-      border-color: rgba(245,231,177,.30);
-      background: linear-gradient(180deg, rgba(245,231,177,.16), rgba(255,255,255,.08));
-    }
-    .btn.ghost{ background: rgba(255,255,255,.04); }
-    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
+    .modal-bg.open{display:flex}
 
-    /* little note */
-    .note{
-      margin-top:10px;
-      font-size:12px;
-      color: rgba(255,255,255,.68);
-      line-height:1.35;
+    .modal{
+      background:var(--white);border:1px solid var(--border);
+      border-radius:14px;max-width:540px;width:100%;
+      max-height:88vh;overflow-y:auto;padding:2.5rem;
+      position:relative;animation:modalIn .3s ease;
     }
+    @keyframes modalIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+
+    .modal-x{
+      position:absolute;top:14px;right:18px;
+      background:none;border:none;font-size:1.8rem;
+      cursor:pointer;color:var(--text-dim);line-height:1;transition:color .2s;
+    }
+    .modal-x:hover{color:var(--text)}
+
+    .m-icon{font-size:3rem;text-align:center;margin-bottom:.3rem}
+    .m-title{
+      font-family:var(--font-head);font-size:1.5rem;font-weight:700;
+      text-align:center;margin-bottom:1.5rem;
+    }
+
+    /* Nominees */
+    .nom-list{list-style:none;display:flex;flex-direction:column;gap:.65rem}
+
+    .nom-item{
+      padding:14px 18px;border:2px solid var(--border);border-radius:8px;
+      cursor:pointer;transition:all .2s;
+      font-size:1.1rem;font-weight:600;
+      display:flex;align-items:center;gap:12px;
+    }
+    .nom-item:hover{border-color:var(--accent);background:rgba(138,125,107,.04)}
+    .nom-item.sel{border-color:var(--gold);background:var(--gold-soft);box-shadow:0 0 0 1px var(--gold)}
+
+    .nom-dot{
+      width:20px;height:20px;border-radius:50%;
+      border:2px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;transition:all .2s;
+    }
+    .nom-item.sel .nom-dot{border-color:var(--gold);background:var(--gold)}
+    .nom-item.sel .nom-dot::after{
+      content:'';width:8px;height:8px;background:#fff;border-radius:50%;
+    }
+
+    .btn-vote{
+      display:block;width:100%;margin-top:1.5rem;padding:14px;
+      background:var(--accent);color:var(--white);border:none;border-radius:6px;
+      font-family:var(--font-head);font-size:1.05rem;font-weight:700;
+      letter-spacing:.1em;cursor:pointer;transition:all .3s;
+    }
+    .btn-vote:hover{background:var(--gold)}
+    .btn-vote:disabled{opacity:.35;cursor:not-allowed}
+
+    /* ══════════ RESULTS ══════════ */
+    #results-section{display:none}
+
+    .res-card{
+      background:var(--bg-card);border:1px solid var(--border);
+      border-radius:10px;padding:2rem;margin-bottom:1.5rem;
+    }
+    .res-head{display:flex;align-items:center;gap:12px;margin-bottom:1.2rem}
+    .res-icon{font-size:2rem}
+    .res-ttl{font-family:var(--font-head);font-size:1.25rem;font-weight:700}
+    .res-total{
+      margin-left:auto;font-family:var(--font-head);
+      font-size:.8rem;color:var(--text-dim);letter-spacing:.08em;
+    }
+
+    .res-bars{display:flex;flex-direction:column;gap:.55rem}
+    .res-row{display:flex;align-items:center;gap:10px}
+    .res-name{
+      width:170px;flex-shrink:0;font-weight:600;font-size:.95rem;text-align:right;
+    }
+    .res-name .crown{margin-left:4px}
+    .res-bar-bg{
+      flex:1;height:26px;background:rgba(0,0,0,.035);
+      border-radius:4px;overflow:hidden;
+    }
+    .res-bar{
+      height:100%;border-radius:4px;
+      background:linear-gradient(to right,var(--accent),var(--accent));
+      transition:width .8s ease;min-width:2px;
+    }
+    .res-bar.winner{background:linear-gradient(to right,var(--gold),#d6ba62)}
+    .res-cnt{
+      width:36px;text-align:center;font-family:var(--font-head);
+      font-weight:700;font-size:.88rem;color:var(--text-dim);
+    }
+
+    .no-votes{
+      text-align:center;color:var(--text-dim);font-style:italic;
+      padding:1.5rem;font-size:1.05rem;
+    }
+
+    /* ══════════ FOOTER ══════════ */
+    .app-footer{
+      text-align:center;padding:2rem;color:var(--text-dim);
+      font-size:.9rem;font-style:italic;
+      border-top:1px solid var(--border);margin-top:2rem;
+    }
+
+    /* ══════════ TOAST ══════════ */
+    .toast{
+      position:fixed;bottom:2rem;left:50%;
+      transform:translateX(-50%) translateY(100px);
+      background:var(--text);color:var(--white);
+      padding:14px 30px;border-radius:8px;
+      font-family:var(--font-head);font-size:.92rem;letter-spacing:.05em;
+      z-index:9999;transition:transform .4s ease;pointer-events:none;
+    }
+    .toast.show{transform:translateX(-50%) translateY(0)}
+
+    /* ══════════ RESPONSIVE ══════════ */
+    @media(max-width:768px){
+      .cat-grid{grid-template-columns:1fr}
+      .app-header{padding:.8rem 1rem;flex-wrap:wrap;gap:.4rem}
+      .hdr-brand{font-size:1.2rem}
+      .nav-tab{padding:.8rem 1.2rem;font-size:.8rem;letter-spacing:.1em}
+      .section{padding:2rem 1rem}
+      .modal{padding:1.5rem;margin:.5rem}
+      .res-name{width:110px;font-size:.85rem}
+      .logo-title{letter-spacing:.1em}
+    }
+
+    /* ══════════ SCROLLBAR ══════════ */
+    ::-webkit-scrollbar{width:7px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+    /* selection */
+    ::selection{background:var(--gold-soft);color:var(--text)}
   </style>
 </head>
-<body>
-  <div class="sky"></div>
-  <div class="fog"></div>
-  <div class="castle"></div>
 
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="crest"></div>
-        <div class="titles">
-          <div class="t1">PEAK • Royal Vote</div>
-          <div class="t2">Нажимай номинацию снизу — меч достанет меню выбора</div>
-        </div>
-      </div>
-      <div class="meta">
-        <div class="pill">Nomination: <b id="pillNom">—</b></div>
-        <div class="pill">Chosen: <b id="pillChosen">0</b></div>
+<body>
+
+<!-- ─── atmospheric layers ─── -->
+<div id="fog"><div class="fog-a"></div><div class="fog-b"></div><div class="fog-c"></div></div>
+<div id="vignette"></div>
+
+<div class="content">
+
+  <!-- ═══════════════════════════
+         LOGIN SCREEN
+       ═══════════════════════════ -->
+  <div id="login-screen">
+    <div class="logo-crown">👑</div>
+    <div class="logo-title">PEAK</div>
+    <div class="logo-sub">Awards of the Year</div>
+
+    <div class="divider">⚔</div>
+
+    <p class="login-quote">
+      Cast your vote.&ensp;Crown the worthy.<br>
+      The fog will lift when the results are revealed.
+    </p>
+
+    <button class="btn-discord" onclick="loginDiscord()">
+      <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+      Enter with Discord
+    </button>
+
+    <button class="btn-guest" onclick="showGuest()">or enter as Guest</button>
+
+    <div id="guest-box">
+      <input type="text" id="guest-name" placeholder="Thy name, traveller..." maxlength="30">
+      <button onclick="loginGuest()">Enter the Hall</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════
+            MAIN APP
+       ═══════════════════════════ -->
+  <div id="app">
+
+    <header class="app-header">
+      <div class="hdr-brand">⚔ PEAK</div>
+      <div class="hdr-user">
+        <img id="usr-avatar" src="" alt="">
+        <span id="usr-name"></span>
+        <button class="btn-out" onclick="logout()">Leave</button>
       </div>
     </header>
 
-    <div class="stage">
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="vote" onclick="switchTab('vote',this)">⚔ Vote</button>
+      <button class="nav-tab" data-tab="results" onclick="switchTab('results',this)">👑 Results</button>
+    </nav>
 
-      <!-- Left: Lore + explanation -->
-      <section class="panel">
-        <div class="panelHead">
-          <div>
-            <div class="name">The Royal Chronicle</div>
-            <div class="desc">Голосование в стиле королей и замков</div>
-          </div>
-        </div>
+    <!-- VOTE section -->
+    <div id="vote-section" class="section">
+      <h2 class="sec-title">Cast Your Vote</h2>
+      <p class="sec-desc">Choose the peak in every category</p>
 
-        <div class="scroll">
-          <div class="scrollTitle">Как это работает</div>
-          <div class="scrollSub">
-            Внизу — список номинаций. Нажми на любую:
-            <br><br>
-            ⚔︎ Меч “вытаскивает” панель выбора.<br>
-            ♛ Выбираешь человека — он становится победителем этой номинации от тебя.<br>
-            ✦ Так пройди все номинации.
-            <br><br>
-            <b>Пока что</b> это только дизайн и UX. Потом подключим отправку в таблицу.
-          </div>
+      <div class="progress-wrap">
+        <div class="progress-text" id="prog-text">0 / 0 voted</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
 
-          <div class="note">
-            Советы по стилю: добавим фоны замков, реальные мечи/гербы (картинки), и звуки металла.
-          </div>
-        </div>
-      </section>
-
-      <!-- Right: Sword drawer -->
-      <section class="panel drawerWrap">
-        <div class="panelHead">
-          <div>
-            <div class="name" id="drawerTitle">Choose a Champion</div>
-            <div class="desc" id="drawerDesc">Выбери победителя для номинации</div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center;">
-            <div class="pill" style="background:rgba(255,255,255,.06)">Tap category ↓</div>
-          </div>
-        </div>
-
-        <div class="drawer" id="drawer">
-          <div class="sword" aria-hidden="true">
-            <div class="blade"></div>
-            <div class="guard"></div>
-            <div class="hilt"></div>
-            <div class="pommel"></div>
-          </div>
-
-          <div class="drawerInner">
-            <div class="drawerBody" id="peopleGrid"></div>
-
-            <div class="drawerFooter">
-              <button class="btn ghost" id="btnClose">Close</button>
-              <button class="btn primary" id="btnConfirm" disabled>Confirm</button>
-            </div>
-          </div>
-        </div>
-
-        <div style="padding:14px; color:rgba(255,255,255,.68); font-size:12px;">
-          Подсказка: выбери номинацию снизу, чтобы открыть “Sword Drawer”.
-        </div>
-      </section>
+      <div class="cat-grid" id="cat-grid"></div>
     </div>
 
-    <!-- Bottom nominations strip -->
-    <section class="bottomBar">
-      <div class="catStrip" id="catStrip"></div>
-    </section>
+    <!-- RESULTS section -->
+    <div id="results-section" class="section">
+      <h2 class="sec-title">The Results</h2>
+      <p class="sec-desc">Behold who has been crowned</p>
+      <div id="results-box"></div>
+    </div>
+
+    <footer class="app-footer">⚔ PEAK — Awards of the Year ⚔</footer>
   </div>
 
-  <script>
-    /* ===== DATA (пока мок) ===== */
-    const CATEGORIES = [
-      { id:"aura",  title:"Peak Aura",  sub:"Кто самый вайбовый?" },
-      { id:"drip",  title:"Peak Drip",  sub:"Кто самый стильный?" },
-      { id:"humor", title:"Peak Humor", sub:"Кто смешнее всех?" },
-      { id:"mc",    title:"Main Character", sub:"Кто главный герой?" },
-      { id:"iq",    title:"Peak IQ",    sub:"Кто самый умный?" },
-      { id:"rizz",  title:"Peak Rizz",  sub:"Кто харизматичнее всех?" },
-    ];
+</div><!-- /content -->
 
-    const PEOPLE = [
-      { name:"Ivan",  img:"https://images.unsplash.com/photo-1520975958225-1f2a2f1b63c5?auto=format&fit=crop&w=900&q=60" },
-      { name:"Masha", img:"https://images.unsplash.com/photo-1524503033411-c9566986fc8f?auto=format&fit=crop&w=900&q=60" },
-      { name:"Sasha", img:"https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=900&q=60" },
-      { name:"Lera",  img:"https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?auto=format&fit=crop&w=900&q=60" },
-      { name:"Dima",  img:"https://images.unsplash.com/photo-1520975661595-6453be3f7070?auto=format&fit=crop&w=900&q=60" },
-      { name:"Katya", img:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=60" },
-    ];
+<!-- ═══ Vote Modal ═══ -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal">
+    <button class="modal-x" onclick="closeModal()">×</button>
+    <div class="m-icon" id="m-icon"></div>
+    <h3 class="m-title" id="m-title"></h3>
+    <ul class="nom-list" id="nom-list"></ul>
+    <button class="btn-vote" id="btn-cast" onclick="submitVote()" disabled>Cast Your Vote</button>
+  </div>
+</div>
 
-    /* ===== STATE ===== */
-    const chosen = {}; // categoryId -> personName
-    let activeCat = null;
-    let pendingPick = null;
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
-    /* ===== UI ===== */
-    const catStrip = document.getElementById("catStrip");
-    const drawer = document.getElementById("drawer");
-    const peopleGrid = document.getElementById("peopleGrid");
-    const pillNom = document.getElementById("pillNom");
-    const pillChosen = document.getElementById("pillChosen");
-    const drawerTitle = document.getElementById("drawerTitle");
-    const drawerDesc = document.getElementById("drawerDesc");
-    const btnClose = document.getElementById("btnClose");
-    const btnConfirm = document.getElementById("btnConfirm");
+<script>
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║                                                               ║
+   ║            ⚔  C O N F I G U R A T I O N  ⚔                  ║
+   ║          Edit the values below to set up your site            ║
+   ║                                                               ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
 
-    function countChosen(){
-      return Object.keys(chosen).length;
+// ─── 1. DISCORD  ────────────────────────────────────────────────
+//  Go to https://discord.com/developers/applications
+//  → New Application → OAuth2 tab
+//  → Add Redirect URL: your GitHub Pages link
+//       e.g.  https://yourusername.github.io/peak/
+//  → Copy CLIENT ID and paste below.
+//
+const DISCORD_CLIENT_ID = 'YOUR_CLIENT_ID_HERE';
+
+// This is detected automatically — no need to change.
+const REDIRECT_URI = location.href.split('#')[0].split('?')[0];
+
+
+// ─── 2. FIREBASE  (optional — enables shared results) ──────────
+//  Go to https://console.firebase.google.com
+//  → Create Project → Add a Web app → copy the config.
+//  → Firestore Database → Create database → Start in TEST mode.
+//  Paste your config values below.
+//
+const FIREBASE_CONFIG = {
+  apiKey:            '',
+  authDomain:        '',
+  projectId:         '',
+  storageBucket:     '',
+  messagingSenderId: '',
+  appId:             ''
+};
+
+
+// ─── 3. CATEGORIES & NOMINEES  ──────────────────────────────────
+//  ★ This is where you add your own categories and nominees! ★
+//  Each category needs: id, icon, title, description, nominees[]
+//
+const CATEGORIES = [
+  {
+    id: 'game',
+    icon: '🎮',
+    title: 'Game of the Year',
+    description: 'The greatest interactive experience',
+    nominees: [
+      'Astro Bot',
+      'Black Myth: Wukong',
+      'Elden Ring: Shadow of the Erdtree',
+      'Final Fantasy VII Rebirth',
+      'Metaphor: ReFantazio'
+    ]
+  },
+  {
+    id: 'movie',
+    icon: '🎬',
+    title: 'Film of the Year',
+    description: 'The peak of cinema',
+    nominees: [
+      'Dune: Part Two',
+      'Deadpool & Wolverine',
+      'Inside Out 2',
+      'The Substance',
+      'Furiosa: A Mad Max Saga'
+    ]
+  },
+  {
+    id: 'show',
+    icon: '📺',
+    title: 'Show of the Year',
+    description: 'The series that had us glued',
+    nominees: [
+      'Shōgun',
+      'Arcane Season 2',
+      'House of the Dragon S2',
+      'Fallout',
+      'The Bear S3'
+    ]
+  },
+  {
+    id: 'song',
+    icon: '🎵',
+    title: 'Song of the Year',
+    description: 'The track on eternal repeat',
+    nominees: [
+      'Song A',
+      'Song B',
+      'Song C',
+      'Song D',
+      'Song E'
+    ]
+  },
+  {
+    id: 'meme',
+    icon: '😂',
+    title: 'Meme of the Year',
+    description: 'The internet\'s finest creation',
+    nominees: [
+      'Meme A',
+      'Meme B',
+      'Meme C',
+      'Meme D',
+      'Meme E'
+    ]
+  },
+  {
+    id: 'moment',
+    icon: '⚡',
+    title: 'Moment of the Year',
+    description: 'The one we\'ll never forget',
+    nominees: [
+      'Moment A',
+      'Moment B',
+      'Moment C',
+      'Moment D',
+      'Moment E'
+    ]
+  },
+  {
+    id: 'flop',
+    icon: '💀',
+    title: 'Biggest Flop',
+    description: 'The most spectacular fall from grace',
+    nominees: [
+      'Flop A',
+      'Flop B',
+      'Flop C',
+      'Flop D',
+      'Flop E'
+    ]
+  },
+  {
+    id: 'person',
+    icon: '👑',
+    title: 'Person of the Year',
+    description: 'The one who ruled the year',
+    nominees: [
+      'Person A',
+      'Person B',
+      'Person C',
+      'Person D',
+      'Person E'
+    ]
+  }
+];
+
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║              END OF CONFIGURATION                             ║
+   ║  (You don't need to edit anything below this line)            ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+
+
+// ── state ──
+let currentUser = null;
+let userVotes   = {};
+let allVotes    = {};
+let db          = null;
+let useFirebase = false;
+let selectedNom = null;
+let curCatId    = null;
+
+// ═══════════════ FIREBASE ═══════════════
+function initFirebase () {
+  try {
+    if (FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId) {
+      firebase.initializeApp(FIREBASE_CONFIG);
+      db = firebase.firestore();
+      useFirebase = true;
+      console.log('[Peak] Firebase connected ✓');
     }
-    function updateTop(){
-      pillNom.textContent = activeCat ? activeCat.title : "—";
-      pillChosen.textContent = String(countChosen());
-    }
+  } catch (e) { console.warn('[Peak] Firebase skipped:', e.message); }
+}
 
-    function renderCategories(){
-      catStrip.innerHTML = "";
-      CATEGORIES.forEach((c, idx)=>{
-        const el = document.createElement("div");
-        el.className = "cat" + (activeCat && activeCat.id===c.id ? " active":"");
-        el.innerHTML = `
-          <div class="medal">${idx+1}</div>
-          <div class="catText">
-            <b>${c.title}</b>
-            <span>${c.sub}</span>
-          </div>
-        `;
-        el.addEventListener("click", ()=>{
-          openCategory(c);
-          document.querySelectorAll(".cat").forEach(x=>x.classList.remove("active"));
-          el.classList.add("active");
-        });
-        catStrip.appendChild(el);
-      });
-    }
+// ═══════════════ AUTH — DISCORD ═══════════════
+function loginDiscord () {
+  if (DISCORD_CLIENT_ID === 'YOUR_CLIENT_ID_HERE') {
+    showToast('Set your Discord Client ID first — see the code!');
+    return;
+  }
+  const url =
+    'https://discord.com/api/oauth2/authorize' +
+    '?client_id='    + DISCORD_CLIENT_ID +
+    '&redirect_uri=' + encodeURIComponent(REDIRECT_URI) +
+    '&response_type=token' +
+    '&scope=identify';
+  location.href = url;
+}
 
-    function renderPeople(){
-      peopleGrid.innerHTML = "";
-      pendingPick = null;
-      btnConfirm.disabled = true;
-
-      const already = activeCat ? chosen[activeCat.id] : null;
-
-      PEOPLE.forEach((p, i)=>{
-        const card = document.createElement("div");
-        card.className = "knightCard" + (already===p.name ? " selected":"");
-        card.innerHTML = `
-          <div class="portrait">
-            <img src="${p.img}" alt="${p.name}">
-            <div class="banner">
-              <div class="shield">${String.fromCharCode(65+i)}</div>
-              <b>${p.name}</b>
-            </div>
-          </div>
-          <div class="knightMeta">
-            <div class="hint">Tap to choose</div>
-            <div class="crown">♛</div>
-          </div>
-        `;
-        card.addEventListener("click", ()=>{
-          pendingPick = p.name;
-          btnConfirm.disabled = false;
-          // selection UI
-          [...peopleGrid.children].forEach(x=>x.classList.remove("selected"));
-          card.classList.add("selected");
-        });
-
-        peopleGrid.appendChild(card);
-      });
-    }
-
-    function openCategory(c){
-      activeCat = c;
-      drawerTitle.textContent = "Choose a Champion";
-      drawerDesc.textContent = `Номинация: ${c.title}`;
-      updateTop();
-      renderPeople();
-      drawer.classList.add("open");
-      // маленький эффект "скрежет меча" — пока без звука
-      // позже подключим звук металла
-    }
-
-    btnClose.addEventListener("click", ()=>{
-      drawer.classList.remove("open");
-      pendingPick = null;
-      btnConfirm.disabled = true;
+async function handleDiscordReturn () {
+  const h = location.hash;
+  if (!h || !h.includes('access_token')) return false;
+  const p = new URLSearchParams(h.substring(1));
+  const token = p.get('access_token');
+  if (!token) return false;
+  try {
+    const r = await fetch('https://discord.com/api/users/@me', {
+      headers: { Authorization: 'Bearer ' + token }
     });
+    const u = await r.json();
+    const av = u.avatar
+      ? 'https://cdn.discordapp.com/avatars/' + u.id + '/' + u.avatar + '.png?size=128'
+      : 'https://cdn.discordapp.com/embed/avatars/' + (parseInt(u.discriminator || '0') % 5) + '.png';
+    currentUser = { id: u.id, name: u.global_name || u.username, avatar: av };
+    sessionStorage.setItem('peak_user', JSON.stringify(currentUser));
+    history.replaceState(null, '', location.pathname + location.search);
+    return true;
+  } catch (e) { console.error('[Peak] Discord auth error', e); return false; }
+}
 
-    btnConfirm.addEventListener("click", ()=>{
-      if(!activeCat || !pendingPick) return;
-      chosen[activeCat.id] = pendingPick;
-      updateTop();
-      btnConfirm.disabled = true;
-      pendingPick = null;
-      // оставляем drawer открытым — чтобы можно было быстро поменять
-      renderPeople();
+// ═══════════════ AUTH — GUEST ═══════════════
+function showGuest () {
+  document.getElementById('guest-box').style.display = 'block';
+  document.getElementById('guest-name').focus();
+}
+
+function loginGuest () {
+  const n = document.getElementById('guest-name').value.trim();
+  if (!n) return;
+  const id = 'g_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+  // generate simple avatar
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">' +
+    '<rect width="80" height="80" rx="40" fill="%238a7d6b"/>' +
+    '<text x="40" y="44" text-anchor="middle" dominant-baseline="middle" ' +
+    'font-family="serif" font-size="34" fill="white">' +
+    n.charAt(0).toUpperCase() + '</text></svg>';
+  currentUser = { id: id, name: n, avatar: 'data:image/svg+xml,' + encodeURIComponent(svg) };
+  sessionStorage.setItem('peak_user', JSON.stringify(currentUser));
+  showApp();
+}
+
+// ═══════════════ SESSION ═══════════════
+function checkSession () {
+  const s = sessionStorage.getItem('peak_user');
+  if (s) { currentUser = JSON.parse(s); return true; }
+  return false;
+}
+
+function logout () {
+  currentUser = null;
+  userVotes = {};
+  sessionStorage.removeItem('peak_user');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+// ═══════════════ SHOW APP ═══════════════
+function showApp () {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('usr-name').textContent = currentUser.name;
+  const av = document.getElementById('usr-avatar');
+  if (currentUser.avatar) { av.src = currentUser.avatar; av.style.display = ''; }
+  else av.style.display = 'none';
+  renderCards();
+  loadVotes();
+}
+
+// ═══════════════ RENDER CARDS ═══════════════
+function renderCards () {
+  const g = document.getElementById('cat-grid');
+  g.innerHTML = CATEGORIES.map(c => {
+    const v = userVotes[c.id];
+    return '<div class="cat-card' + (v ? ' voted' : '') + '" onclick="openModal(\'' + c.id + '\')">' +
+      '<span class="badge-voted">✓ voted</span>' +
+      '<div class="cat-icon">' + c.icon + '</div>' +
+      '<div class="cat-title">' + c.title + '</div>' +
+      '<div class="cat-desc">' + c.description + '</div>' +
+      (v ? '<div class="cat-your-pick">Your pick: ' + esc(v) + '</div>' : '') +
+      '</div>';
+  }).join('');
+  updateProgress();
+}
+
+function updateProgress () {
+  const total = CATEGORIES.length;
+  const done  = CATEGORIES.filter(c => userVotes[c.id]).length;
+  document.getElementById('prog-text').textContent = done + ' / ' + total + ' voted';
+  document.getElementById('prog-fill').style.width = (done / total * 100) + '%';
+}
+
+// ═══════════════ MODAL ═══════════════
+function openModal (catId) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+  curCatId    = catId;
+  selectedNom = userVotes[catId] || null;
+
+  document.getElementById('m-icon').textContent  = cat.icon;
+  document.getElementById('m-title').textContent = cat.title;
+
+  const list = document.getElementById('nom-list');
+  list.innerHTML = cat.nominees.map(n => {
+    const sel = selectedNom === n ? ' sel' : '';
+    return '<li class="nom-item' + sel + '" data-nom="' + esc(n) + '" onclick="pickNom(this)">' +
+      '<div class="nom-dot"></div><span>' + esc(n) + '</span></li>';
+  }).join('');
+
+  const btn = document.getElementById('btn-cast');
+  btn.disabled    = !selectedNom;
+  btn.textContent = userVotes[catId] ? 'Change Your Vote' : 'Cast Your Vote';
+
+  document.getElementById('modal-bg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function pickNom (el) {
+  document.querySelectorAll('.nom-item').forEach(i => i.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedNom = el.dataset.nom;
+  document.getElementById('btn-cast').disabled = false;
+}
+
+function closeModal () {
+  document.getElementById('modal-bg').classList.remove('open');
+  document.body.style.overflow = '';
+  selectedNom = null;
+  curCatId    = null;
+}
+
+// ═══════════════ SUBMIT VOTE ═══════════════
+async function submitVote () {
+  if (!selectedNom || !curCatId) return;
+  userVotes[curCatId] = selectedNom;
+
+  // save to firebase
+  if (useFirebase) {
+    try {
+      const data = { name: currentUser.name, avatar: currentUser.avatar || '' };
+      CATEGORIES.forEach(c => { if (userVotes[c.id]) data[c.id] = userVotes[c.id]; });
+      data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('peak_votes').doc(currentUser.id).set(data, { merge: true });
+    } catch (e) { console.error('[Peak] Firebase save error', e); }
+  }
+
+  // always save locally too
+  localStorage.setItem('peak_v_' + currentUser.id, JSON.stringify(userVotes));
+
+  closeModal();
+  renderCards();
+  showToast('Vote recorded! ⚔');
+}
+
+// ═══════════════ LOAD VOTES ═══════════════
+async function loadVotes () {
+  // local first
+  const lv = localStorage.getItem('peak_v_' + currentUser.id);
+  if (lv) { userVotes = JSON.parse(lv); renderCards(); }
+
+  if (!useFirebase) return;
+
+  try {
+    const doc = await db.collection('peak_votes').doc(currentUser.id).get();
+    if (doc.exists) {
+      const d = doc.data();
+      CATEGORIES.forEach(c => { if (d[c.id]) userVotes[c.id] = d[c.id]; });
+      localStorage.setItem('peak_v_' + currentUser.id, JSON.stringify(userVotes));
+      renderCards();
+    }
+  } catch (e) { console.error('[Peak] Load votes error', e); }
+}
+
+async function loadAllVotes () {
+  allVotes = {};
+  if (useFirebase) {
+    try {
+      const snap = await db.collection('peak_votes').get();
+      snap.forEach(d => { allVotes[d.id] = d.data(); });
+    } catch (e) { console.error('[Peak] Load all votes error', e); }
+  }
+  // always include own votes
+  if (currentUser) {
+    if (!allVotes[currentUser.id]) allVotes[currentUser.id] = {};
+    CATEGORIES.forEach(c => { if (userVotes[c.id]) allVotes[currentUser.id][c.id] = userVotes[c.id]; });
+  }
+}
+
+// ═══════════════ RESULTS ═══════════════
+function renderResults () {
+  const box = document.getElementById('results-box');
+  const voters = Object.keys(allVotes).length;
+
+  if (voters === 0) {
+    box.innerHTML = '<div class="no-votes">No votes have been cast yet.</div>';
+    return;
+  }
+
+  if (!useFirebase && voters <= 1) {
+    box.innerHTML = '<div class="no-votes" style="margin-bottom:1.5rem">' +
+      '⚔ Configure Firebase to see everyone\'s votes.<br>' +
+      'Currently showing only your own picks.</div>';
+  } else {
+    box.innerHTML = '';
+  }
+
+  box.innerHTML += CATEGORIES.map(cat => {
+    const counts = {};
+    cat.nominees.forEach(n => counts[n] = 0);
+    Object.values(allVotes).forEach(uv => {
+      const pick = uv[cat.id];
+      if (pick && counts.hasOwnProperty(pick)) counts[pick]++;
     });
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    const max   = Math.max(...Object.values(counts));
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
 
-    // init
-    renderCategories();
-    updateTop();
-  </script>
+    return '<div class="res-card">' +
+      '<div class="res-head">' +
+        '<span class="res-icon">' + cat.icon + '</span>' +
+        '<span class="res-ttl">'  + cat.title + '</span>' +
+        '<span class="res-total">' + total + ' vote' + (total !== 1 ? 's' : '') + '</span>' +
+      '</div>' +
+      (total === 0
+        ? '<div class="no-votes">No votes yet</div>'
+        : '<div class="res-bars">' + sorted.map(([name, cnt]) => {
+            const pct = total > 0 ? (cnt / total * 100) : 0;
+            const w   = cnt === max && cnt > 0;
+            return '<div class="res-row">' +
+              '<div class="res-name">' + esc(name) + (w ? ' <span class="crown">👑</span>' : '') + '</div>' +
+              '<div class="res-bar-bg"><div class="res-bar' + (w ? ' winner' : '') + '" style="width:' + pct + '%"></div></div>' +
+              '<div class="res-cnt">' + cnt + '</div>' +
+            '</div>';
+          }).join('') + '</div>'
+      ) +
+    '</div>';
+  }).join('');
+}
+
+// ═══════════════ TABS ═══════════════
+function switchTab (tab, btn) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'vote') {
+    document.getElementById('vote-section').style.display    = 'block';
+    document.getElementById('results-section').style.display = 'none';
+  } else {
+    document.getElementById('vote-section').style.display    = 'none';
+    document.getElementById('results-section').style.display = 'block';
+    loadAllVotes().then(renderResults);
+  }
+}
+
+// ═══════════════ HELPERS ═══════════════
+function esc (s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function showToast (msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ═══════════════ PARTICLES ═══════════════
+function spawnParticles () {
+  const c = document.createElement('div');
+  c.className = 'particles';
+  c.setAttribute('aria-hidden', 'true');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const sz = Math.random() * 2.5 + 1;
+    Object.assign(p.style, {
+      width:  sz + 'px',
+      height: sz + 'px',
+      left:   Math.random() * 100 + '%',
+      animationDuration: (Math.random() * 18 + 12) + 's',
+      animationDelay:    (Math.random() * 12) + 's'
+    });
+    c.appendChild(p);
+  }
+  document.body.appendChild(c);
+}
+
+// ═══════════════ EVENTS ═══════════════
+document.getElementById('modal-bg').addEventListener('click', function (e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeModal();
+});
+document.getElementById('guest-name').addEventListener('keypress', function (e) {
+  if (e.key === 'Enter') loginGuest();
+});
+
+// ═══════════════ INIT ═══════════════
+(async function init () {
+  spawnParticles();
+  initFirebase();
+
+  const discordOk = await handleDiscordReturn();
+  if (discordOk || checkSession()) {
+    showApp();
+  }
+})();
+</script>
 </body>
 </html>

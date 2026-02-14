@@ -18,1514 +18,2118 @@
     --blood-bright: #8b2020;
     --gold-tarnished: #6b5a2e;
     --rust: #4a2a1a;
-    --fog: rgba(20, 18, 15, 0.7);
+    --dread: 0;
   }
 
   html, body {
     width: 100%; height: 100%;
     overflow: hidden;
-    background: #050505;
+    background: #030303;
     font-family: 'Cinzel', serif;
     color: var(--bone);
     cursor: none;
-  }
-
-  /* CUSTOM CURSOR */
-  #cursor {
-    position: fixed;
-    width: 24px; height: 24px;
-    pointer-events: none;
-    z-index: 100000;
-    mix-blend-mode: difference;
-    transition: transform 0.08s ease;
-  }
-  #cursor::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 4px; height: 4px;
-    background: var(--bone);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 8px rgba(196, 184, 154, 0.3);
-  }
-  #cursor::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 20px; height: 20px;
-    border: 1px solid rgba(196, 184, 154, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  /* GLOBAL OVERLAYS */
-  #grain-overlay {
-    position: fixed;
-    top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    z-index: 99998;
-    pointer-events: none;
-    opacity: 0.08;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    animation: grainShift 0.3s steps(3) infinite;
-  }
-  @keyframes grainShift {
-    0% { transform: translate(0, 0); }
-    33% { transform: translate(-2px, 1px); }
-    66% { transform: translate(1px, -2px); }
-    100% { transform: translate(-1px, 2px); }
-  }
-
-  #vignette {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 99997;
-    pointer-events: none;
-    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0.95) 100%);
-  }
-
-  #fog-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 99996;
-    pointer-events: none;
-    opacity: 0.4;
-  }
-
-  #distortion-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 99995;
-    pointer-events: none;
-    opacity: 0;
-    background: radial-gradient(circle at var(--dx, 50%) var(--dy, 50%), rgba(90,26,26,0.15) 0%, transparent 40%);
-    transition: opacity 0.5s;
-  }
-
-  /* SCANLINES */
-  #scanlines {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 99994;
-    pointer-events: none;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
-    );
-  }
-
-  /* ========== GATE SCENE ========== */
-  #gate-scene {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: var(--ash);
-    transition: opacity 1.5s ease;
-  }
-
-  #gate-scene.destroyed {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .gate-bg {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background:
-      radial-gradient(ellipse at 50% 80%, rgba(90,26,26,0.08) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 20%, rgba(58,56,50,0.3) 0%, transparent 60%),
-      linear-gradient(180deg, #080706 0%, #0d0c0a 40%, #0a0908 100%);
-  }
-
-  .gate-texture {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    opacity: 0.04;
-    background-image:
-      repeating-linear-gradient(90deg, transparent, transparent 98px, rgba(196,184,154,0.1) 98px, rgba(196,184,154,0.1) 100px),
-      repeating-linear-gradient(0deg, transparent, transparent 98px, rgba(196,184,154,0.05) 98px, rgba(196,184,154,0.05) 100px);
-  }
-
-  .gate-warning {
-    position: relative;
-    text-align: center;
-    z-index: 2;
+    -webkit-user-select: none;
     user-select: none;
   }
 
-  .gate-symbol {
-    font-size: 3rem;
-    color: var(--blood);
-    opacity: 0.6;
-    margin-bottom: 2rem;
-    font-family: 'UnifrakturMaguntia', cursive;
-    animation: symbolPulse 4s ease-in-out infinite;
-    text-shadow: 0 0 20px rgba(90,26,26,0.3);
+  /* ====== CUSTOM CURSOR ====== */
+  #cursor-outer {
+    position: fixed; width: 36px; height: 36px;
+    pointer-events: none; z-index: 200000;
+    border: 1px solid rgba(196,184,154,0.12);
+    border-radius: 50%;
+    transition: transform 0.15s cubic-bezier(0.23,1,0.32,1), width 0.3s, height 0.3s, border-color 0.5s;
+    transform: translate(-50%, -50%);
+  }
+  #cursor-inner {
+    position: fixed; width: 4px; height: 4px;
+    pointer-events: none; z-index: 200001;
+    background: rgba(196,184,154,0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 6px rgba(196,184,154,0.15);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  body.cursor-disturbed #cursor-outer {
+    border-color: rgba(139,32,32,0.3);
+    border-radius: 40% 50% 45% 55%;
+  }
+  body.cursor-disturbed #cursor-inner {
+    background: rgba(139,32,32,0.6);
+    box-shadow: 0 0 10px rgba(139,32,32,0.3);
   }
 
-  @keyframes symbolPulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.7; }
+  /* ====== LAYERED BACKGROUND SYSTEM ====== */
+  /* Layer 0: Abyss - the deepest void */
+  #bg-abyss {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 50% 120%, #0c0a08 0%, #030303 60%, #000000 100%);
+  }
+
+  /* Layer 1: Architecture - barely visible ruined structures */
+  #bg-architecture {
+    position: fixed; inset: -10%; z-index: 1;
+    width: 120%; height: 120%;
+    pointer-events: none;
+    opacity: 0.04;
+    will-change: transform;
+  }
+
+  /* Layer 2: Deep fog volumes */
+  #bg-deep-fog {
+    position: fixed; inset: 0; z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Layer 3: Mid atmosphere - particulate, shadow forms */
+  #bg-mid-atmosphere {
+    position: fixed; inset: 0; z-index: 3;
+    pointer-events: none;
+  }
+
+  /* Layer 4: Light sources - inconsistent, unreliable */
+  #bg-light-sources {
+    position: fixed; inset: 0; z-index: 4;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+  }
+
+  /* Layer 5: Interference - scratches, stains that move */
+  #bg-interference {
+    position: fixed; inset: -5%; z-index: 99900;
+    width: 110%; height: 110%;
+    pointer-events: none;
+    opacity: 0.06;
+    will-change: transform;
+  }
+
+  /* Layer 6: Grain - living film grain */
+  #bg-grain {
+    position: fixed; inset: -50%;
+    width: 200%; height: 200%;
+    z-index: 99950;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grainCrawl 0.12s steps(2) infinite;
+  }
+  @keyframes grainCrawl {
+    0% { transform: translate(0,0) rotate(0deg); }
+    25% { transform: translate(-1px,2px) rotate(0.1deg); }
+    50% { transform: translate(2px,-1px) rotate(-0.1deg); }
+    75% { transform: translate(-2px,-1px) rotate(0.05deg); }
+    100% { transform: translate(1px,1px) rotate(-0.05deg); }
+  }
+
+  /* Layer 7: Vignette - aggressive, breathing */
+  #bg-vignette {
+    position: fixed; inset: 0; z-index: 99960;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.92) 100%);
+  }
+
+  /* Layer 8: Distortion overlay - warps with dread */
+  #bg-distortion {
+    position: fixed; inset: 0; z-index: 99970;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2s;
+  }
+
+  /* Layer 9: Screen damage - accumulates permanently */
+  #bg-damage {
+    position: fixed; inset: 0; z-index: 99980;
+    pointer-events: none;
+  }
+
+  /* Layer 10: Scanlines */
+  #bg-scanlines {
+    position: fixed; inset: 0; z-index: 99940;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+      transparent, transparent 2px,
+      rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
+    );
+    opacity: 0.6;
+  }
+
+  /* Layer 11: Occluding foreground elements */
+  .fg-occluder {
+    position: fixed; z-index: 99910;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 8s ease;
+  }
+
+  /* Flash overlay */
+  #flash-overlay {
+    position: fixed; inset: 0; z-index: 199999;
+    pointer-events: none;
+    background: rgba(196,184,154,0.1);
+    opacity: 0;
+    transition: opacity 0.05s;
+  }
+
+  /* ====== MASTER CANVASES ====== */
+  #canvas-bg { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+  #canvas-fx { position: fixed; inset: 0; z-index: 99985; pointer-events: none; }
+  #canvas-sword { position: fixed; inset: 0; z-index: 100050; pointer-events: none; }
+
+  /* ====== SCREEN WARP (Silent Hill distortion) ====== */
+  #screen-warp {
+    position: fixed; inset: 0; z-index: 99930;
+    pointer-events: none;
+    filter: none;
+    transition: filter 3s ease;
+  }
+
+  /* ====== IDLE DARKNESS ====== */
+  #idle-darkness {
+    position: fixed; inset: 0; z-index: 99920;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--ix,50%) var(--iy,50%), transparent 5%, rgba(0,0,0,0.0) 30%);
+    opacity: 0;
+    transition: opacity 4s ease;
+  }
+
+  /* ====== REGISTRATION SCENE ====== */
+  #registration-scene {
+    position: fixed; inset: 0; z-index: 10000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: opacity 2s ease;
+  }
+  #registration-scene.hidden {
+    opacity: 0; pointer-events: none;
+  }
+
+  .reg-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    letter-spacing: 0.6em;
+    text-transform: uppercase;
+    color: var(--bone);
+    opacity: 0;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.9);
+    margin-bottom: 0.5rem;
+  }
+  .reg-subtitle {
+    font-size: 0.55rem;
+    letter-spacing: 0.35em;
+    color: rgba(196,184,154,0.15);
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    opacity: 0;
+  }
+
+  .reg-input-container {
+    position: relative;
+    width: 320px;
+    opacity: 0;
+  }
+
+  .reg-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(196,184,154,0.08);
+    color: var(--bone);
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-align: center;
+    padding: 1rem 0;
+    outline: none;
+    caret-color: var(--blood-bright);
+    transition: border-color 1s;
+  }
+  .reg-input::placeholder {
+    color: rgba(196,184,154,0.08);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+  .reg-input:focus {
+    border-bottom-color: rgba(139,32,32,0.3);
+  }
+
+  .reg-char-echo {
+    position: absolute;
+    bottom: -30px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 0.5rem;
+    letter-spacing: 0.5em;
+    color: rgba(139,32,32,0.2);
+    height: 20px;
+    overflow: hidden;
+  }
+
+  .reg-brand-line {
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blood-bright), transparent);
+    margin-top: 3rem;
+    transition: width 1.5s cubic-bezier(0.23,1,0.32,1);
+    opacity: 0;
+  }
+
+  .reg-seal {
+    position: relative;
+    width: 100px; height: 100px;
+    margin-top: 3rem;
+    opacity: 0;
+    cursor: none;
+  }
+  .reg-seal-ring {
+    position: absolute; inset: 0;
+    border: 1px solid rgba(196,184,154,0.1);
+    border-radius: 50%;
+    transition: border-color 0.5s, transform 0.5s;
+  }
+  .reg-seal-progress {
+    position: absolute; inset: -3px;
+  }
+  .reg-seal-progress circle {
+    fill: none;
+    stroke: var(--blood-bright);
+    stroke-width: 1.5;
+    stroke-dasharray: 340;
+    stroke-dashoffset: 340;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    filter: drop-shadow(0 0 4px rgba(139,32,32,0.3));
+  }
+  .reg-seal-icon {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: 1.8rem;
+    color: var(--blood);
+    opacity: 0.4;
+    transition: opacity 0.3s;
+  }
+  .reg-seal-text {
+    position: absolute;
+    bottom: -28px;
+    left: 50%; transform: translateX(-50%);
+    font-size: 0.45rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(196,184,154,0.12);
+    white-space: nowrap;
+  }
+
+  .reg-error {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: 1.2rem;
+    color: var(--blood);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10001;
+    text-shadow: 0 0 20px rgba(139,32,32,0.4);
+    transition: opacity 0.3s;
+  }
+
+  /* ====== GATE SCENE ====== */
+  #gate-scene {
+    position: fixed; inset: 0; z-index: 10000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: opacity 1.8s ease;
+  }
+  #gate-scene.destroyed {
+    opacity: 0; pointer-events: none;
+  }
+
+  .gate-symbol {
+    font-size: 3.5rem;
+    color: var(--blood);
+    opacity: 0;
+    font-family: 'UnifrakturMaguntia', cursive;
+    animation: symbolBreath 5s ease-in-out infinite;
+    text-shadow: 0 0 30px rgba(90,26,26,0.2);
+  }
+  @keyframes symbolBreath {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(1.02); }
   }
 
   .gate-title {
     font-family: 'Cinzel Decorative', serif;
-    font-size: 1.6rem;
-    font-weight: 900;
-    letter-spacing: 0.5em;
+    font-size: 1.4rem; font-weight: 900;
+    letter-spacing: 0.6em;
     text-transform: uppercase;
-    color: var(--bone);
-    opacity: 0.7;
-    margin-bottom: 1rem;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    color: var(--bone); opacity: 0;
+    margin: 1.5rem 0 0.5rem;
+    text-shadow: 0 3px 15px rgba(0,0,0,0.9);
   }
-
   .gate-subtitle {
-    font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     letter-spacing: 0.3em;
-    color: rgba(196, 184, 154, 0.3);
-    margin-bottom: 4rem;
+    color: rgba(196,184,154,0.15);
     text-transform: uppercase;
+    opacity: 0;
+    margin-bottom: 3rem;
   }
 
-  /* THE SEAL - must be held to enter */
+  /* Gate seal */
   .gate-seal {
     position: relative;
-    width: 160px;
-    height: 160px;
+    width: 140px; height: 140px;
     cursor: none;
+    opacity: 0;
   }
-
-  .seal-ring {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    border: 2px solid rgba(196,184,154,0.15);
+  .gate-seal-ring {
+    position: absolute; inset: 0;
+    border: 2px solid rgba(196,184,154,0.1);
     border-radius: 50%;
-    transition: border-color 0.5s;
+    transition: border-color 0.5s, box-shadow 0.5s;
   }
-
-  .seal-progress {
-    position: absolute;
-    top: -4px; left: -4px;
-    width: calc(100% + 8px);
-    height: calc(100% + 8px);
+  .gate-seal-progress {
+    position: absolute; inset: -4px;
   }
-
-  .seal-progress circle {
+  .gate-seal-progress circle {
     fill: none;
     stroke: var(--blood-bright);
     stroke-width: 2;
-    stroke-dasharray: 502;
-    stroke-dashoffset: 502;
-    stroke-linecap: butt;
+    stroke-dasharray: 470;
+    stroke-dashoffset: 470;
     transform: rotate(-90deg);
     transform-origin: center;
-    transition: stroke-dashoffset 0.1s linear;
-    filter: drop-shadow(0 0 6px rgba(139, 32, 32, 0.4));
+    filter: drop-shadow(0 0 6px rgba(139,32,32,0.4));
+    transition: stroke-dashoffset 0.05s linear;
   }
-
-  .seal-inner {
+  .gate-seal-inner {
     position: absolute;
     top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%,-50%);
     font-family: 'UnifrakturMaguntia', cursive;
     font-size: 2.5rem;
     color: var(--blood);
-    opacity: 0.5;
+    opacity: 0.4;
     transition: opacity 0.3s, transform 0.3s;
   }
-
-  .seal-text {
+  .gate-seal-text {
     position: absolute;
-    bottom: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.6rem;
+    bottom: -35px;
+    left: 50%; transform: translateX(-50%);
+    font-size: 0.5rem;
     letter-spacing: 0.4em;
     text-transform: uppercase;
-    color: rgba(196, 184, 154, 0.2);
+    color: rgba(196,184,154,0.12);
     white-space: nowrap;
-    transition: color 0.3s;
+  }
+  .gate-seal.pressing .gate-seal-inner {
+    opacity: 0.7; transform: translate(-50%,-50%) scale(0.94);
+  }
+  .gate-seal.pressing .gate-seal-ring {
+    border-color: rgba(139,32,32,0.25);
+    box-shadow: 0 0 30px rgba(90,26,26,0.1);
   }
 
-  .gate-seal:hover .seal-text {
-    color: rgba(196, 184, 154, 0.4);
-  }
-
-  .gate-seal.pressing .seal-inner {
-    opacity: 0.8;
-    transform: translate(-50%, -50%) scale(0.95);
-  }
-
-  .gate-seal.pressing .seal-ring {
-    border-color: rgba(139, 32, 32, 0.3);
-  }
-
-  /* ========== JUDGMENT HALL ========== */
-  #hall-scene {
+  /* Welcome whisper - shown to returning registered users */
+  .welcome-whisper {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 500;
-    opacity: 0;
+    bottom: 8%;
+    left: 50%; transform: translateX(-50%);
+    font-size: 0.5rem;
+    letter-spacing: 0.3em;
+    color: rgba(196,184,154,0.0);
+    text-transform: uppercase;
+    z-index: 10001;
+    white-space: nowrap;
+    transition: color 8s ease;
     pointer-events: none;
-    transition: opacity 2s ease;
+  }
+  .welcome-whisper.visible {
+    color: rgba(196,184,154,0.12);
+  }
+
+  /* ====== JUDGMENT HALL ====== */
+  #hall-scene {
+    position: fixed; inset: 0; z-index: 5000;
+    opacity: 0; pointer-events: none;
+    transition: opacity 2.5s ease;
     overflow: hidden;
   }
-
   #hall-scene.active {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .hall-bg {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background:
-      radial-gradient(ellipse at 50% 30%, rgba(58,56,50,0.15) 0%, transparent 60%),
-      radial-gradient(ellipse at 20% 80%, rgba(90,26,26,0.05) 0%, transparent 40%),
-      radial-gradient(ellipse at 80% 80%, rgba(90,26,26,0.05) 0%, transparent 40%),
-      linear-gradient(180deg, #0a0908 0%, #0e0d0b 50%, #080706 100%);
+    opacity: 1; pointer-events: auto;
   }
 
   .hall-header {
     position: absolute;
-    top: 6%;
-    left: 50%;
+    top: 7%; left: 50%;
     transform: translateX(-50%);
-    text-align: center;
-    z-index: 10;
+    text-align: center; z-index: 10;
   }
-
   .hall-title {
     font-family: 'Cinzel Decorative', serif;
-    font-size: 1.8rem;
-    font-weight: 900;
-    letter-spacing: 0.4em;
+    font-size: 1.5rem; font-weight: 900;
+    letter-spacing: 0.5em;
     text-transform: uppercase;
     color: var(--bone);
     opacity: 0;
-    text-shadow: 0 2px 15px rgba(0,0,0,0.8);
-    animation: hallTitleReveal 3s ease forwards;
-    animation-delay: 1s;
+    text-shadow: 0 3px 20px rgba(0,0,0,0.9);
+    animation: hallTitleReveal 4s ease forwards 1.5s;
   }
-
   @keyframes hallTitleReveal {
-    0% { opacity: 0; letter-spacing: 1em; }
-    100% { opacity: 0.6; letter-spacing: 0.4em; }
+    0% { opacity: 0; letter-spacing: 1.2em; filter: blur(3px); }
+    70% { filter: blur(0); }
+    100% { opacity: 0.5; letter-spacing: 0.5em; }
   }
-
   .hall-divider {
-    width: 200px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(196,184,154,0.2), transparent);
+    width: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,184,154,0.15), transparent);
     margin: 1rem auto;
     opacity: 0;
-    animation: fadeIn 2s ease forwards;
-    animation-delay: 2s;
+    animation: dividerGrow 2s ease forwards 3s;
   }
-
+  @keyframes dividerGrow {
+    to { width: 250px; opacity: 1; }
+  }
   .hall-decree {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: rgba(196, 184, 154, 0.2);
-    opacity: 0;
-    animation: fadeIn 2s ease forwards;
-    animation-delay: 2.5s;
+    color: rgba(196,184,154,0.0);
+    animation: decreeAppear 3s ease forwards 4s;
+  }
+  @keyframes decreeAppear {
+    to { color: rgba(196,184,154,0.15); }
   }
 
-  @keyframes fadeIn {
-    to { opacity: 1; }
+  /* Identity inscription - shows the user's name burned into the hall */
+  .hall-inscription {
+    position: absolute;
+    bottom: 6%; left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.45rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(139,32,32,0.0);
+    z-index: 10;
+    white-space: nowrap;
+    transition: color 10s ease;
+  }
+  .hall-inscription.visible {
+    color: rgba(139,32,32,0.12);
   }
 
-  /* CANDIDATES */
+  /* Chain decorations */
+  .chain-decor {
+    position: absolute;
+    width: 2px;
+    background: repeating-linear-gradient(180deg,
+      rgba(196,184,154,0.06) 0px, rgba(196,184,154,0.06) 5px,
+      transparent 5px, transparent 11px
+    );
+    opacity: 0.4;
+    z-index: 5;
+  }
+
+  /* Candidates */
   .candidates-row {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
     display: flex;
-    gap: 100px;
+    gap: 90px;
     z-index: 10;
   }
 
   .candidate {
     position: relative;
-    width: 180px;
+    width: 170px;
     text-align: center;
     cursor: none;
     opacity: 0;
-    transform: translateY(40px);
-    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    transform: translateY(60px);
+    transition: transform 0.8s cubic-bezier(0.23,1,0.32,1), opacity 1.2s ease;
   }
-
   .candidate.revealed {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1; transform: translateY(0);
   }
 
   .candidate-pillar {
     position: relative;
-    width: 100%;
-    height: 260px;
-    background: linear-gradient(180deg, rgba(30,28,24,0.9) 0%, rgba(20,18,15,0.95) 100%);
-    border: 1px solid rgba(196,184,154,0.06);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    width: 100%; height: 250px;
+    background: linear-gradient(180deg, rgba(25,23,19,0.95) 0%, rgba(15,13,10,0.98) 100%);
+    border: 1px solid rgba(196,184,154,0.04);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     overflow: hidden;
-    transition: border-color 0.8s ease, box-shadow 0.8s ease;
+    transition: border-color 1s, box-shadow 1s;
   }
-
   .candidate-pillar::before {
     content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background:
-      repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px);
-    pointer-events: none;
-  }
-
-  .candidate-pillar::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: radial-gradient(ellipse at 50% 0%, rgba(196,184,154,0.03) 0%, transparent 70%);
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg,
+      transparent, transparent 3px,
+      rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px
+    );
     pointer-events: none;
   }
 
   .candidate:hover .candidate-pillar {
-    border-color: rgba(139, 32, 32, 0.2);
-    box-shadow:
-      0 0 40px rgba(90, 26, 26, 0.1),
-      inset 0 0 30px rgba(90, 26, 26, 0.05);
+    border-color: rgba(139,32,32,0.15);
+    box-shadow: 0 0 50px rgba(90,26,26,0.08), inset 0 0 40px rgba(90,26,26,0.04);
   }
 
   .candidate-sigil {
     font-family: 'UnifrakturMaguntia', cursive;
-    font-size: 4rem;
+    font-size: 3.5rem;
     color: var(--blood);
-    opacity: 0.4;
-    transition: opacity 0.5s, text-shadow 0.5s;
-    text-shadow: 0 0 20px rgba(90,26,26,0.2);
+    opacity: 0.35;
+    transition: opacity 0.8s, text-shadow 0.8s, transform 0.8s;
+    text-shadow: 0 0 25px rgba(90,26,26,0.15);
   }
-
   .candidate:hover .candidate-sigil {
-    opacity: 0.7;
-    text-shadow: 0 0 30px rgba(90,26,26,0.4);
+    opacity: 0.6;
+    text-shadow: 0 0 35px rgba(90,26,26,0.3);
+    transform: scale(1.05);
   }
-
   .candidate-name {
     font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.75rem; font-weight: 700;
     letter-spacing: 0.3em;
     text-transform: uppercase;
     color: var(--bone);
-    opacity: 0.5;
-    margin-top: 1.5rem;
-    transition: opacity 0.5s;
+    opacity: 0.4;
+    margin-top: 1.2rem;
+    transition: opacity 0.8s;
   }
-
-  .candidate:hover .candidate-name {
-    opacity: 0.8;
-  }
+  .candidate:hover .candidate-name { opacity: 0.7; }
 
   .candidate-epithet {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
     letter-spacing: 0.2em;
-    color: rgba(196, 184, 154, 0.2);
-    margin-top: 0.5rem;
+    color: rgba(196,184,154,0.12);
+    margin-top: 0.4rem;
     font-style: italic;
     text-transform: lowercase;
   }
 
-  /* CANDIDATE BASE */
+  .candidate-torch {
+    position: absolute;
+    top: -20%; left: 50%;
+    width: 200%; height: 60%;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(107,90,46,0.03) 0%, transparent 70%);
+    animation: torchBreath 4s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes torchBreath {
+    0% { opacity: 0.2; }
+    30% { opacity: 0.45; }
+    50% { opacity: 0.25; }
+    70% { opacity: 0.5; }
+    100% { opacity: 0.3; }
+  }
+
   .candidate-base {
-    width: 140%;
-    height: 8px;
-    background: linear-gradient(180deg, rgba(30,28,24,0.8), rgba(10,10,10,0.9));
-    border-top: 1px solid rgba(196,184,154,0.05);
+    width: 130%; height: 6px;
+    background: linear-gradient(180deg, rgba(25,23,19,0.7), rgba(8,8,8,0.9));
+    border-top: 1px solid rgba(196,184,154,0.03);
     margin-top: -1px;
   }
 
-  /* VOTE CONFIRMATION - replaces the pillar */
-  .candidate.chosen .candidate-pillar {
-    border-color: rgba(139, 32, 32, 0.4) !important;
-    box-shadow:
-      0 0 60px rgba(90, 26, 26, 0.2),
-      inset 0 0 40px rgba(90, 26, 26, 0.1) !important;
-  }
-
-  .candidate.condemned .candidate-pillar {
-    border-color: rgba(196,184,154,0.02) !important;
-    box-shadow: none !important;
+  .candidate::before {
+    content: '';
+    position: absolute;
+    top: -40px; left: 50%;
+    width: 2px; height: 40px;
+    background: repeating-linear-gradient(180deg,
+      rgba(196,184,154,0.06) 0px, rgba(196,184,154,0.06) 4px,
+      transparent 4px, transparent 9px
+    );
+    transform: translateX(-50%);
     opacity: 0.3;
+    transition: height 0.8s, opacity 0.8s;
+  }
+  .candidate:hover::before {
+    height: 60px; opacity: 0.5;
   }
 
-  /* ========== EXECUTION SCENE ========== */
-  #execution-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 2000;
-    pointer-events: none;
-    opacity: 0;
+  .candidate.chosen .candidate-pillar {
+    border-color: rgba(139,32,32,0.4) !important;
+    box-shadow: 0 0 80px rgba(90,26,26,0.15), inset 0 0 50px rgba(90,26,26,0.08) !important;
+  }
+  .candidate.condemned {
+    opacity: 0.15 !important;
+    transform: translateY(10px) !important;
+    transition: opacity 2s, transform 2s !important;
   }
 
-  #execution-overlay.active {
-    opacity: 1;
-  }
-
-  #sword-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 2001;
-    pointer-events: none;
-  }
-
-  /* CRACK SYSTEM */
-  .crack-line {
-    position: fixed;
-    background: rgba(196, 184, 154, 0.1);
-    z-index: 99990;
-    pointer-events: none;
-    transform-origin: top center;
-  }
-
-  .crack-glow {
-    position: fixed;
-    z-index: 99989;
-    pointer-events: none;
-    background: radial-gradient(ellipse, rgba(90,26,26,0.15) 0%, transparent 70%);
-  }
-
-  /* AFTERMATH */
+  /* ====== AFTERMATH ====== */
   #aftermath-scene {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 3000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: fixed; inset: 0; z-index: 100000;
+    display: flex; align-items: center; justify-content: center;
     flex-direction: column;
-    opacity: 0;
-    pointer-events: none;
-    background: radial-gradient(ellipse at center, rgba(10,9,8,0.95) 0%, #050505 100%);
+    opacity: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(8,7,6,0.97) 0%, #020202 100%);
     transition: opacity 3s ease;
   }
-
   #aftermath-scene.active {
-    opacity: 1;
-    pointer-events: auto;
+    opacity: 1; pointer-events: auto;
+  }
+
+  .aftermath-crown {
+    font-size: 2.5rem;
+    opacity: 0;
+    color: var(--gold-tarnished);
+    text-shadow: 0 0 20px rgba(107,90,46,0.2);
+    animation: crownDescend 4s ease forwards 0.5s;
+  }
+  @keyframes crownDescend {
+    0% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+    40% { opacity: 0.5; transform: translateY(8px) scale(0.98); }
+    70% { transform: translateY(-3px) scale(1.01); }
+    100% { opacity: 0.35; transform: translateY(0) scale(1); }
   }
 
   .aftermath-text {
     font-family: 'Cinzel Decorative', serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: 0.5em;
+    font-size: 1.2rem; font-weight: 700;
+    letter-spacing: 0.6em;
     text-transform: uppercase;
     color: var(--blood-bright);
     opacity: 0;
-    text-shadow: 0 0 30px rgba(139, 32, 32, 0.3);
+    text-shadow: 0 0 30px rgba(139,32,32,0.2);
   }
-
   .aftermath-name {
     font-family: 'UnifrakturMaguntia', cursive;
     font-size: 3rem;
     color: var(--bone);
     opacity: 0;
-    margin-top: 1rem;
-    text-shadow: 0 0 20px rgba(196,184,154,0.2);
+    margin-top: 0.8rem;
+    text-shadow: 0 0 20px rgba(196,184,154,0.15);
   }
-
   .aftermath-scar {
-    width: 300px;
-    height: 1px;
+    width: 0; height: 1px;
     background: linear-gradient(90deg, transparent, var(--blood), transparent);
     margin-top: 2rem;
     opacity: 0;
+    transition: width 2s ease, opacity 1s ease;
   }
-
+  .aftermath-scar.visible {
+    width: 300px; opacity: 0.4;
+  }
   .aftermath-epitaph {
-    font-size: 0.6rem;
+    font-size: 0.5rem;
     letter-spacing: 0.3em;
-    color: rgba(196,184,154,0.15);
+    color: rgba(196,184,154,0.0);
     margin-top: 2rem;
-    opacity: 0;
     text-transform: uppercase;
+    transition: color 3s ease;
+  }
+  .aftermath-epitaph.visible {
+    color: rgba(196,184,154,0.12);
+  }
+  .aftermath-identity {
+    font-size: 0.4rem;
+    letter-spacing: 0.5em;
+    color: rgba(139,32,32,0.0);
+    margin-top: 1.5rem;
+    text-transform: uppercase;
+    transition: color 5s ease 2s;
+  }
+  .aftermath-identity.visible {
+    color: rgba(139,32,32,0.1);
   }
 
-  /* PAGE SCAR - permanent damage */
-  .page-scar {
+  /* ====== PERMANENT DAMAGE ====== */
+  .permanent-crack {
     position: fixed;
+    background: rgba(196,184,154,0.06);
+    z-index: 99988;
     pointer-events: none;
-    z-index: 99991;
+    transform-origin: 0 0;
   }
-
-  /* SCREEN SHAKE */
-  .shake-1 { animation: shake1 0.15s ease; }
-  .shake-2 { animation: shake2 0.3s ease; }
-  .shake-3 { animation: shake3 0.5s ease; }
-
-  @keyframes shake1 {
-    0%, 100% { transform: translate(0); }
-    25% { transform: translate(-3px, 2px); }
-    50% { transform: translate(2px, -3px); }
-    75% { transform: translate(-2px, 1px); }
-  }
-
-  @keyframes shake2 {
-    0%, 100% { transform: translate(0); }
-    10% { transform: translate(-6px, 4px); }
-    30% { transform: translate(5px, -6px); }
-    50% { transform: translate(-4px, 3px); }
-    70% { transform: translate(3px, -2px); }
-    90% { transform: translate(-1px, 1px); }
-  }
-
-  @keyframes shake3 {
-    0%, 100% { transform: translate(0); }
-    5% { transform: translate(-10px, 6px) rotate(-0.5deg); }
-    15% { transform: translate(8px, -8px) rotate(0.3deg); }
-    25% { transform: translate(-6px, 4px) rotate(-0.2deg); }
-    35% { transform: translate(5px, -5px) rotate(0.1deg); }
-    50% { transform: translate(-3px, 2px); }
-    70% { transform: translate(2px, -1px); }
-  }
-
-  /* FLASH */
-  #flash-overlay {
+  .permanent-scar-h {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 99999;
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent 5%, rgba(139,32,32,0.08) 30%, rgba(139,32,32,0.15) 50%, rgba(139,32,32,0.08) 70%, transparent 95%);
+    z-index: 99987;
     pointer-events: none;
-    background: rgba(196, 184, 154, 0.1);
-    opacity: 0;
+    opacity: 0.5;
   }
-
-  /* TORCHLIGHT FLICKER on candidates */
-  .torch-light {
-    position: absolute;
-    top: -20%;
-    left: 50%;
-    width: 200%;
-    height: 60%;
-    transform: translateX(-50%);
-    background: radial-gradient(ellipse at center, rgba(107,90,46,0.04) 0%, transparent 70%);
-    animation: torchFlicker 3s ease-in-out infinite alternate;
+  .permanent-scar-v {
+    position: fixed;
+    width: 1px; height: 100%;
+    background: linear-gradient(180deg, transparent 5%, rgba(139,32,32,0.08) 30%, rgba(139,32,32,0.15) 50%, rgba(139,32,32,0.08) 70%, transparent 95%);
+    z-index: 99987;
     pointer-events: none;
-  }
-
-  @keyframes torchFlicker {
-    0% { opacity: 0.3; transform: translateX(-50%) scale(1); }
-    20% { opacity: 0.5; }
-    40% { opacity: 0.35; transform: translateX(-50%) scale(1.02); }
-    60% { opacity: 0.55; }
-    80% { opacity: 0.3; transform: translateX(-50%) scale(0.98); }
-    100% { opacity: 0.45; transform: translateX(-50%) scale(1.01); }
-  }
-
-  /* VOTED STATE - entire page */
-  body.voted {
-    filter: saturate(0.6) brightness(0.85);
-  }
-
-  body.voted #hall-scene .hall-bg {
-    background:
-      radial-gradient(ellipse at 50% 30%, rgba(58,56,50,0.08) 0%, transparent 60%),
-      linear-gradient(180deg, #080706 0%, #0a0908 50%, #060505 100%);
-  }
-
-  /* Breathing animation for the hall */
-  .hall-breathing {
-    animation: hallBreathe 8s ease-in-out infinite;
-  }
-
-  @keyframes hallBreathe {
-    0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(0.95); }
-  }
-
-  /* Chain decoration */
-  .chain-decor {
-    position: absolute;
-    width: 2px;
-    background: repeating-linear-gradient(180deg, rgba(196,184,154,0.08) 0px, rgba(196,184,154,0.08) 6px, transparent 6px, transparent 12px);
     opacity: 0.5;
   }
 
-  /* Blood drip */
   .blood-drip {
     position: fixed;
     width: 2px;
     background: linear-gradient(180deg, var(--blood-bright), transparent);
-    z-index: 99992;
+    z-index: 99989;
     pointer-events: none;
     opacity: 0;
-    animation: dripFall 2s ease-in forwards;
+    animation: dripFall 2.5s ease-in forwards;
     transform-origin: top;
   }
-
   @keyframes dripFall {
     0% { opacity: 0; transform: scaleY(0); }
-    10% { opacity: 0.6; }
+    8% { opacity: 0.5; }
     100% { opacity: 0; transform: scaleY(1); }
   }
 
-  /* EMBER PARTICLES */
   .ember {
     position: fixed;
-    width: 3px;
-    height: 3px;
+    width: 3px; height: 3px;
     background: var(--blood-bright);
     border-radius: 50%;
-    z-index: 99993;
+    z-index: 99990;
     pointer-events: none;
-    opacity: 0;
-    box-shadow: 0 0 6px rgba(139,32,32,0.6);
+    box-shadow: 0 0 6px rgba(139,32,32,0.5);
   }
 
-  /* CANDIDATE REVEAL SLASH */
-  .reveal-slash {
-    position: absolute;
-    top: 50%;
-    left: -10%;
-    width: 120%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(196,184,154,0.3), rgba(196,184,154,0.5), rgba(196,184,154,0.3), transparent);
-    transform: scaleX(0);
-    transform-origin: left;
-    z-index: 20;
-    pointer-events: none;
+  /* Shake */
+  .shake-1 { animation: shake1 0.15s ease; }
+  .shake-2 { animation: shake2 0.3s ease; }
+  .shake-3 { animation: shake3 0.5s ease; }
+  @keyframes shake1 {
+    0%,100%{transform:translate(0)}
+    25%{transform:translate(-3px,2px)}
+    50%{transform:translate(2px,-3px)}
+    75%{transform:translate(-2px,1px)}
+  }
+  @keyframes shake2 {
+    0%,100%{transform:translate(0)}
+    10%{transform:translate(-6px,4px)}
+    30%{transform:translate(5px,-6px)}
+    50%{transform:translate(-4px,3px)}
+    70%{transform:translate(3px,-2px)}
+  }
+  @keyframes shake3 {
+    0%,100%{transform:translate(0)}
+    5%{transform:translate(-12px,7px) rotate(-0.5deg)}
+    15%{transform:translate(9px,-9px) rotate(0.4deg)}
+    25%{transform:translate(-7px,5px) rotate(-0.3deg)}
+    40%{transform:translate(5px,-4px)}
+    60%{transform:translate(-3px,2px)}
   }
 
-  .candidate.revealed .reveal-slash {
-    animation: slashReveal 0.4s ease-out forwards;
-  }
-
-  @keyframes slashReveal {
-    0% { transform: scaleX(0); opacity: 1; }
-    60% { transform: scaleX(1); opacity: 0.8; }
-    100% { transform: scaleX(1); opacity: 0; }
-  }
-
-  /* PERMANENT SCARS after voting */
-  .scar-mark {
+  /* ====== VOID CLICK RIPPLE ====== */
+  .void-ripple {
     position: fixed;
+    border: 1px solid rgba(196,184,154,0.06);
+    border-radius: 50%;
     pointer-events: none;
-    z-index: 99988;
-    opacity: 0.06;
+    z-index: 99986;
+    animation: voidExpand 2s ease-out forwards;
+  }
+  @keyframes voidExpand {
+    0% { width: 0; height: 0; opacity: 0.3; }
+    100% { width: 300px; height: 300px; opacity: 0; margin-left: -150px; margin-top: -150px; }
   }
 
-  .scar-mark.horizontal {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent 10%, rgba(139,32,32,0.3) 30%, rgba(139,32,32,0.5) 50%, rgba(139,32,32,0.3) 70%, transparent 90%);
-  }
-
-  .scar-mark.vertical {
-    width: 1px;
-    height: 100%;
-    background: linear-gradient(180deg, transparent 10%, rgba(139,32,32,0.3) 30%, rgba(139,32,32,0.5) 50%, rgba(139,32,32,0.3) 70%, transparent 90%);
-  }
-
-  /* CHROMATIC ABERRATION on vote */
-  @keyframes chromaticPulse {
-    0% { text-shadow: -2px 0 rgba(139,32,32,0.5), 2px 0 rgba(90,90,140,0.3); }
-    50% { text-shadow: -4px 0 rgba(139,32,32,0.3), 4px 0 rgba(90,90,140,0.2); }
-    100% { text-shadow: none; }
-  }
-
-  .chromatic-hit {
-    animation: chromaticPulse 0.5s ease forwards;
-  }
-
-  /* IRON DUST overlay */
-  .iron-dust {
+  /* ====== GHOST TEXT ====== */
+  .ghost-text {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 99987;
+    font-size: 0.4rem;
+    letter-spacing: 0.5em;
+    color: rgba(196,184,154,0.0);
+    text-transform: uppercase;
     pointer-events: none;
-    opacity: 0;
-    background:
-      radial-gradient(1px 1px at 20% 30%, rgba(196,184,154,0.15) 50%, transparent 50%),
-      radial-gradient(1px 1px at 40% 70%, rgba(196,184,154,0.1) 50%, transparent 50%),
-      radial-gradient(1px 1px at 60% 20%, rgba(196,184,154,0.12) 50%, transparent 50%),
-      radial-gradient(1px 1px at 80% 50%, rgba(196,184,154,0.08) 50%, transparent 50%),
-      radial-gradient(1px 1px at 10% 80%, rgba(196,184,154,0.1) 50%, transparent 50%),
-      radial-gradient(1px 1px at 90% 10%, rgba(196,184,154,0.1) 50%, transparent 50%),
-      radial-gradient(2px 2px at 35% 55%, rgba(139,32,32,0.08) 50%, transparent 50%),
-      radial-gradient(1px 1px at 75% 85%, rgba(196,184,154,0.12) 50%, transparent 50%);
-    transition: opacity 3s ease;
+    z-index: 99915;
+    transition: color 3s ease;
+    font-family: 'Cinzel', serif;
   }
-
-  body.voted .iron-dust {
-    opacity: 0.4;
+  .ghost-text.visible {
+    color: rgba(196,184,154,0.04);
   }
-
-  /* GATE CRACKS on approach */
-  .gate-crack {
-    position: absolute;
-    background: rgba(139, 32, 32, 0.15);
-    pointer-events: none;
-    transform-origin: center;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
-
-  /* CANDIDATE HOVER CHAIN EFFECT */
-  .candidate::before {
-    content: '';
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    width: 2px;
-    height: 30px;
-    background: repeating-linear-gradient(180deg,
-      rgba(196,184,154,0.1) 0px,
-      rgba(196,184,154,0.1) 4px,
-      transparent 4px,
-      transparent 8px
-    );
-    transform: translateX(-50%);
-    opacity: 0.3;
-    transition: height 0.6s ease, opacity 0.6s ease;
-  }
-
-  .candidate:hover::before {
-    height: 50px;
-    opacity: 0.6;
-  }
-
-  /* CROWN for aftermath */
-  .aftermath-crown {
-    font-size: 2rem;
-    opacity: 0;
-    margin-bottom: 1rem;
-    color: var(--gold-tarnished);
-    text-shadow: 0 0 15px rgba(107,90,46,0.3);
-    animation: crownDescend 3s ease forwards;
-    animation-delay: 0.5s;
-  }
-
-  @keyframes crownDescend {
-    0% { opacity: 0; transform: translateY(-40px); }
-    60% { opacity: 0.6; transform: translateY(5px); }
-    80% { opacity: 0.5; transform: translateY(-2px); }
-    100% { opacity: 0.4; transform: translateY(0); }
+  .ghost-text.fading {
+    color: rgba(196,184,154,0.0);
+    transition: color 8s ease;
   }
 </style>
 </head>
 <body>
 
-<!-- CUSTOM CURSOR -->
-<div id="cursor"></div>
+<!-- Cursor -->
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
 
-<!-- GLOBAL OVERLAYS -->
-<div id="grain-overlay"></div>
-<div id="vignette"></div>
-<canvas id="fog-canvas"></canvas>
-<div id="distortion-overlay"></div>
-<div id="scanlines"></div>
+<!-- Background layers -->
+<div id="bg-abyss"></div>
+<canvas id="canvas-bg"></canvas>
+<div id="bg-architecture"></div>
+<div id="bg-light-sources"></div>
+<div id="bg-scanlines"></div>
+<div id="bg-interference"></div>
+<div id="bg-grain"></div>
+<div id="bg-vignette"></div>
+<div id="bg-distortion"></div>
+<div id="bg-damage"></div>
+<div id="idle-darkness"></div>
 <div id="flash-overlay"></div>
-<canvas id="sword-canvas"></canvas>
-<div class="iron-dust"></div>
+<canvas id="canvas-fx"></canvas>
+<canvas id="canvas-sword"></canvas>
 
-<!-- ========== GATE SCENE ========== -->
-<div id="gate-scene">
-  <div class="gate-bg"></div>
-  <div class="gate-texture"></div>
-  <div class="gate-warning">
-    <div class="gate-symbol">&#x2720;</div>
-    <div class="gate-title">The Judgment Hall</div>
-    <div class="gate-subtitle">None shall enter without intent</div>
-    <div class="gate-seal" id="gate-seal">
-      <div class="seal-ring"></div>
-      <svg class="seal-progress" viewBox="0 0 168 168">
-        <circle cx="84" cy="84" r="80" />
-      </svg>
-      <div class="seal-inner">&#x2694;</div>
-      <div class="seal-text">Hold to break the seal</div>
-    </div>
+<!-- Registration scene -->
+<div id="registration-scene" class="hidden">
+  <div class="reg-title" id="reg-title">Declare Yourself</div>
+  <div class="reg-subtitle" id="reg-subtitle">The hall demands a name</div>
+  <div class="reg-input-container" id="reg-input-container">
+    <input class="reg-input" id="reg-input" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="speak your name">
+    <div class="reg-char-echo" id="reg-char-echo"></div>
   </div>
+  <div class="reg-brand-line" id="reg-brand-line"></div>
+  <div class="reg-seal" id="reg-seal">
+    <div class="reg-seal-ring"></div>
+    <svg class="reg-seal-progress" viewBox="0 0 106 106">
+      <circle cx="53" cy="53" r="50" />
+    </svg>
+    <div class="reg-seal-icon">&#x2717;</div>
+    <div class="reg-seal-text">Hold to brand yourself</div>
+  </div>
+  <div class="reg-error" id="reg-error"></div>
 </div>
 
-<!-- ========== JUDGMENT HALL ========== -->
-<div id="hall-scene">
-  <div class="hall-bg hall-breathing"></div>
-  <div class="chain-decor" style="left: 8%; top: 0; height: 100%;"></div>
-  <div class="chain-decor" style="right: 8%; top: 0; height: 100%;"></div>
-  <div class="chain-decor" style="left: 15%; top: 0; height: 60%;"></div>
-  <div class="chain-decor" style="right: 15%; top: 0; height: 60%;"></div>
+<!-- Gate scene -->
+<div id="gate-scene" style="display:none;">
+  <div class="gate-symbol">&#x2720;</div>
+  <div class="gate-title" id="gate-title">The Judgment Hall</div>
+  <div class="gate-subtitle" id="gate-subtitle">None shall enter without intent</div>
+  <div class="gate-seal" id="gate-seal">
+    <div class="gate-seal-ring"></div>
+    <svg class="gate-seal-progress" viewBox="0 0 152 152">
+      <circle cx="76" cy="76" r="73" />
+    </svg>
+    <div class="gate-seal-inner">&#x2694;</div>
+    <div class="gate-seal-text">Hold to break the seal</div>
+  </div>
+  <div class="welcome-whisper" id="welcome-whisper"></div>
+</div>
 
+<!-- Judgment Hall -->
+<div id="hall-scene">
+  <div class="chain-decor" style="left:7%;top:0;height:100%;"></div>
+  <div class="chain-decor" style="right:7%;top:0;height:100%;"></div>
+  <div class="chain-decor" style="left:14%;top:0;height:55%;"></div>
+  <div class="chain-decor" style="right:14%;top:0;height:55%;"></div>
   <div class="hall-header">
     <div class="hall-title">Choose Who Shall Be Crowned</div>
     <div class="hall-divider"></div>
     <div class="hall-decree">One must fall so another may rise</div>
   </div>
-
-  <div class="candidates-row" id="candidates-row">
-    <!-- Candidates injected by JS -->
-  </div>
+  <div class="hall-inscription" id="hall-inscription"></div>
+  <div class="candidates-row" id="candidates-row"></div>
 </div>
 
-<!-- ========== EXECUTION OVERLAY ========== -->
-<div id="execution-overlay"></div>
-
-<!-- ========== AFTERMATH ========== -->
+<!-- Aftermath -->
 <div id="aftermath-scene">
-  <div class="aftermath-crown" id="aftermath-crown">♛</div>
+  <div class="aftermath-crown">&#9819;</div>
   <div class="aftermath-text" id="aftermath-text">It is done</div>
   <div class="aftermath-name" id="aftermath-name"></div>
   <div class="aftermath-scar" id="aftermath-scar"></div>
   <div class="aftermath-epitaph" id="aftermath-epitaph">The hall remembers what you have chosen</div>
+  <div class="aftermath-identity" id="aftermath-identity"></div>
 </div>
 
 <script>
-// ============================================================
+// ================================================================
 // CONFIGURATION
-// ============================================================
+// ================================================================
 const CANDIDATES = [
-  { name: 'Aldric', sigil: '&#x2694;', epithet: 'the unyielding' },
+  { name: 'Aldric',   sigil: '&#x2694;', epithet: 'the unyielding' },
   { name: 'Morrigan', sigil: '&#x2620;', epithet: 'the forsaken' },
-  { name: 'Theron', sigil: '&#x2726;', epithet: 'the hollow crown' },
-  { name: 'Isolde', sigil: '&#x2740;', epithet: 'the silent blade' },
+  { name: 'Theron',   sigil: '&#x2726;', epithet: 'the hollow crown' },
+  { name: 'Isolde',   sigil: '&#x2740;', epithet: 'the silent blade' },
 ];
 
-const HOLD_DURATION = 3000; // ms to hold gate seal
-const VOTE_KEY = 'judgment_hall_vote_v1';
-const FINGERPRINT_KEY = 'judgment_hall_fp_v1';
+const HOLD_GATE = 3200;
+const HOLD_REG  = 2800;
 
-// ============================================================
-// ANTI-CHEAT: Vote integrity
-// ============================================================
-function generateFingerprint() {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.textBaseline = 'top';
-  ctx.font = '14px Arial';
-  ctx.fillText('judgment', 2, 2);
-  const canvasData = canvas.toDataURL();
+const KEYS = {
+  identity: 'jh_identity_v2',
+  vote:     'jh_vote_v2',
+  fp:       'jh_fp_v2',
+  damage:   'jh_damage_v2',
+  session:  'jh_session_v2',
+};
 
-  const data = [
-    navigator.userAgent,
-    navigator.language,
-    screen.width + 'x' + screen.height,
-    screen.colorDepth,
-    new Date().getTimezoneOffset(),
-    navigator.hardwareConcurrency || 'unknown',
-    canvasData.slice(-50)
-  ].join('|');
+// ================================================================
+// DREAD ACCUMULATOR
+// ================================================================
+// Central escalation state — drives all atmospheric intensity.
+// Increases with time, interactions, and idle duration.
+// Never decreases within a session. Persists partially across sessions.
+const DREAD = {
+  value: 0,
+  interactionCount: 0,
+  sessionStart: Date.now(),
+  lastActivity: Date.now(),
+  idleDuration: 0,
 
-  let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    const char = data.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
+  // Add dread from any source
+  add(amount) {
+    this.value = Math.min(1, this.value + amount);
+  },
+
+  // Tick called every frame
+  tick() {
+    const elapsed = (Date.now() - this.sessionStart) / 1000;
+    const idle = (Date.now() - this.lastActivity) / 1000;
+    this.idleDuration = idle;
+
+    // Time-based dread: slow creep
+    this.add(0.00003);
+
+    // Idle escalation: the longer you stare, the worse it gets
+    if (idle > 5) this.add(0.00008);
+    if (idle > 15) this.add(0.00015);
+    if (idle > 30) this.add(0.0003);
+    if (idle > 60) this.add(0.0005);
+  },
+
+  // Record user activity
+  activity() {
+    this.lastActivity = Date.now();
+    this.interactionCount++;
+    this.add(0.002);
+  },
+
+  // Get current dread level (0-1)
+  get level() {
+    return this.value;
   }
-  return 'fp_' + Math.abs(hash).toString(36);
+};
+
+// Load persistent damage level
+const savedDamage = localStorage.getItem(KEYS.damage);
+if (savedDamage) {
+  DREAD.add(parseFloat(savedDamage) * 0.3); // Carry 30% of previous damage
 }
 
-function hasVoted() {
-  const vote = localStorage.getItem(VOTE_KEY);
-  const fp = localStorage.getItem(FINGERPRINT_KEY);
-  const sessionVote = sessionStorage.getItem(VOTE_KEY);
-  return !!(vote || sessionVote || (fp && fp === generateFingerprint()));
+// ================================================================
+// CURSOR SYSTEM
+// ================================================================
+let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+let mxSmooth = mx, mySmooth = my;
+let cursorVelocity = 0;
+let lastMx = mx, lastMy = my;
+
+const cursorOuter = document.getElementById('cursor-outer');
+const cursorInner = document.getElementById('cursor-inner');
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX;
+  my = e.clientY;
+
+  // Velocity tracking for "too fast" detection
+  const dx = mx - lastMx, dy = my - lastMy;
+  cursorVelocity = Math.sqrt(dx*dx + dy*dy);
+  lastMx = mx;
+  lastMy = my;
+
+  DREAD.activity();
+
+  // Fast movement causes cursor distortion
+  if (cursorVelocity > 60) {
+    document.body.classList.add('cursor-disturbed');
+    setTimeout(() => document.body.classList.remove('cursor-disturbed'), 300 + Math.random() * 500);
+    if (Math.random() < 0.15) {
+      screenFlash(30, 0.03);
+    }
+  }
+});
+
+function updateCursor() {
+  // Smooth follow with slight lag
+  mxSmooth += (mx - mxSmooth) * 0.18;
+  mySmooth += (my - mySmooth) * 0.18;
+
+  // Add dread-based jitter
+  const jitter = DREAD.level * 3;
+  const jx = (Math.random() - 0.5) * jitter;
+  const jy = (Math.random() - 0.5) * jitter;
+
+  cursorOuter.style.left = (mxSmooth + jx) + 'px';
+  cursorOuter.style.top = (mySmooth + jy) + 'px';
+  cursorInner.style.left = mx + 'px';
+  cursorInner.style.top = my + 'px';
 }
 
-function recordVote(candidateName) {
-  const voteData = {
-    candidate: candidateName,
-    timestamp: Date.now(),
-    fp: generateFingerprint()
-  };
-  localStorage.setItem(VOTE_KEY, JSON.stringify(voteData));
-  sessionStorage.setItem(VOTE_KEY, JSON.stringify(voteData));
-  localStorage.setItem(FINGERPRINT_KEY, generateFingerprint());
-}
-
-function getVoteData() {
-  const raw = localStorage.getItem(VOTE_KEY);
-  return raw ? JSON.parse(raw) : null;
-}
-
-// ============================================================
-// AUDIO ENGINE (Web Audio API)
-// ============================================================
+// ================================================================
+// AUDIO ENGINE
+// ================================================================
 class AudioEngine {
-  constructor() {
-    this.ctx = null;
-    this.initialized = false;
-  }
+  constructor() { this.ctx = null; this.ready = false; }
 
   init() {
-    if (this.initialized) return;
+    if (this.ready) return;
     try {
       this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-      this.initialized = true;
-    } catch(e) {
-      console.warn('Audio not available');
-    }
+      this.ready = true;
+    } catch(e) {}
   }
 
-  // Low metallic scrape
-  metalScrape(duration = 1.5) {
+  _noise(duration, freqLow, freqHigh, volume, type='bandpass') {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
-
-    const bufferSize = this.ctx.sampleRate * duration;
-    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
-    }
-
-    const source = this.ctx.createBufferSource();
-    source.buffer = buffer;
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 800;
-    filter.Q.value = 5;
-
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.06, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.ctx.destination);
-    source.start(now);
-  }
-
-  // Deep impact
-  impact(intensity = 1) {
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-
-    const osc = this.ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(80 * intensity, now);
-    osc.frequency.exponentialRampToValueAtTime(20, now + 0.8);
-
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.3 * intensity, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
-
-    // Noise burst
-    const bufSize = this.ctx.sampleRate * 0.3;
-    const noiseBuf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
-    const noiseData = noiseBuf.getChannelData(0);
-    for (let i = 0; i < bufSize; i++) {
-      noiseData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.05));
-    }
-    const noiseSource = this.ctx.createBufferSource();
-    noiseSource.buffer = noiseBuf;
-    const noiseFilter = this.ctx.createBiquadFilter();
-    noiseFilter.type = 'lowpass';
-    noiseFilter.frequency.value = 400;
-    const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.15 * intensity, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(this.ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 1.2);
-    noiseSource.start(now);
-  }
-
-  // Low drone
-  drone(duration = 5) {
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-
-    const osc1 = this.ctx.createOscillator();
-    osc1.type = 'sine';
-    osc1.frequency.value = 40;
-
-    const osc2 = this.ctx.createOscillator();
-    osc2.type = 'sine';
-    osc2.frequency.value = 41.5; // slight detune for beating
-
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.04, now + 1);
-    gain.gain.linearRampToValueAtTime(0.04, now + duration - 1.5);
-    gain.gain.linearRampToValueAtTime(0, now + duration);
-
-    osc1.connect(gain);
-    osc2.connect(gain);
-    gain.connect(this.ctx.destination);
-
-    osc1.start(now);
-    osc2.start(now);
-    osc1.stop(now + duration);
-    osc2.stop(now + duration);
-  }
-
-  // Chain rattle
-  chainRattle() {
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-
-    for (let i = 0; i < 5; i++) {
-      const t = now + i * 0.08;
-      const bufSize = this.ctx.sampleRate * 0.1;
-      const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let j = 0; j < bufSize; j++) {
-        d[j] = (Math.random() * 2 - 1) * Math.exp(-j / (bufSize * 0.1));
-      }
-      const src = this.ctx.createBufferSource();
-      src.buffer = buf;
-      const flt = this.ctx.createBiquadFilter();
-      flt.type = 'highpass';
-      flt.frequency.value = 2000 + Math.random() * 3000;
-      const g = this.ctx.createGain();
-      g.gain.setValueAtTime(0.04, t);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-      src.connect(flt);
-      flt.connect(g);
-      g.connect(this.ctx.destination);
-      src.start(t);
-    }
-  }
-
-  // Sword fall whoosh
-  swordWhoosh() {
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-
-    const bufSize = this.ctx.sampleRate * 0.6;
-    const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+    const len = this.ctx.sampleRate * duration;
+    const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
     const d = buf.getChannelData(0);
-    for (let i = 0; i < bufSize; i++) {
-      const t = i / this.ctx.sampleRate;
-      d[i] = (Math.random() * 2 - 1) * Math.sin(t * Math.PI / 0.6) * 0.8;
-    }
+    for (let i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.exp(-i/(len*0.3));
     const src = this.ctx.createBufferSource();
     src.buffer = buf;
-
     const flt = this.ctx.createBiquadFilter();
-    flt.type = 'bandpass';
-    flt.frequency.setValueAtTime(200, now);
-    flt.frequency.exponentialRampToValueAtTime(4000, now + 0.3);
-    flt.frequency.exponentialRampToValueAtTime(500, now + 0.6);
-    flt.Q.value = 2;
-
+    flt.type = type;
+    flt.frequency.value = (freqLow + freqHigh) / 2;
+    flt.Q.value = 3;
     const g = this.ctx.createGain();
-    g.gain.setValueAtTime(0, now);
-    g.gain.linearRampToValueAtTime(0.2, now + 0.2);
-    g.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-
-    src.connect(flt);
-    flt.connect(g);
-    g.connect(this.ctx.destination);
+    g.gain.setValueAtTime(volume, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    src.connect(flt); flt.connect(g); g.connect(this.ctx.destination);
     src.start(now);
+  }
+
+  metalScrape(dur=1.5) { this._noise(dur, 600, 1200, 0.05, 'bandpass'); }
+
+  impact(intensity=1) {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(70*intensity, now);
+    osc.frequency.exponentialRampToValueAtTime(18, now+1);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.25*intensity, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now+1.5);
+    osc.connect(g); g.connect(this.ctx.destination);
+    osc.start(now); osc.stop(now+1.5);
+    this._noise(0.3, 100, 500, 0.12*intensity, 'lowpass');
+  }
+
+  drone(duration=6) {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    [38, 39.5, 77].forEach(freq => {
+      const osc = this.ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.025, now+1.5);
+      g.gain.linearRampToValueAtTime(0.025, now+duration-2);
+      g.gain.linearRampToValueAtTime(0, now+duration);
+      osc.connect(g); g.connect(this.ctx.destination);
+      osc.start(now); osc.stop(now+duration);
+    });
+  }
+
+  chainRattle() {
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => this._noise(0.12, 2500, 5000, 0.03, 'highpass'), i*70);
+    }
+  }
+
+  swordWhoosh() { this._noise(0.6, 200, 4000, 0.15, 'bandpass'); }
+
+  // Typing sound - single character brand
+  charBrand() {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.value = 120 + Math.random() * 40;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.03, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    osc.connect(g); g.connect(this.ctx.destination);
+    osc.start(now); osc.stop(now + 0.1);
+  }
+
+  // Error rejection sound
+  errorReject() {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.value = 55;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.08, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    osc.connect(g); g.connect(this.ctx.destination);
+    osc.start(now); osc.stop(now + 0.4);
+  }
+
+  // Ambient hallucination - random distant sound
+  hallucination() {
+    if (!this.ctx) return;
+    const roll = Math.random();
+    if (roll < 0.3) {
+      this._noise(2, 200, 400, 0.01, 'bandpass');
+    } else if (roll < 0.6) {
+      // Distant metallic ping
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = 800 + Math.random() * 1200;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.008, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+      osc.connect(g); g.connect(this.ctx.destination);
+      osc.start(now); osc.stop(now + 1.5);
+    } else {
+      // Very low rumble
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = 25 + Math.random() * 15;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.02, now+1);
+      g.gain.linearRampToValueAtTime(0, now+3);
+      osc.connect(g); g.connect(this.ctx.destination);
+      osc.start(now); osc.stop(now+3);
+    }
   }
 }
 
 const audio = new AudioEngine();
 
-// ============================================================
-// FOG SYSTEM (Canvas)
-// ============================================================
-const fogCanvas = document.getElementById('fog-canvas');
-const fogCtx = fogCanvas.getContext('2d');
-let fogParticles = [];
-let mouseX = window.innerWidth / 2;
-let mouseY = window.innerHeight / 2;
+// ================================================================
+// BACKGROUND ENTITY SYSTEM
+// ================================================================
+// The background is not scenery. It is a multi-layered organism
+// that breathes, reacts, and degrades.
 
-function initFog() {
-  fogCanvas.width = window.innerWidth;
-  fogCanvas.height = window.innerHeight;
+const bgCanvas = document.getElementById('canvas-bg');
+const bgCtx = bgCanvas.getContext('2d');
+const fxCanvas = document.getElementById('canvas-fx');
+const fxCtx = fxCanvas.getContext('2d');
+const swordCanvas = document.getElementById('canvas-sword');
+const swordCtx = swordCanvas.getContext('2d');
 
-  fogParticles = [];
-  for (let i = 0; i < 40; i++) {
-    fogParticles.push({
-      x: Math.random() * fogCanvas.width,
-      y: Math.random() * fogCanvas.height,
-      radius: 80 + Math.random() * 200,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.15,
-      opacity: 0.01 + Math.random() * 0.03,
-      phase: Math.random() * Math.PI * 2
+function resizeCanvases() {
+  [bgCanvas, fxCanvas, swordCanvas].forEach(c => {
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+  });
+}
+window.addEventListener('resize', resizeCanvases);
+resizeCanvases();
+
+// --- Deep fog particles (Layer 2) ---
+// These are large, slow-moving fog volumes that create
+// the sensation of being inside a vast ruined space
+let fogVolumes = [];
+function initFogVolumes() {
+  fogVolumes = [];
+  for (let i = 0; i < 35; i++) {
+    fogVolumes.push({
+      x: Math.random() * bgCanvas.width,
+      y: Math.random() * bgCanvas.height,
+      r: 120 + Math.random() * 280,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.12,
+      opacity: 0.008 + Math.random() * 0.025,
+      phase: Math.random() * Math.PI * 2,
+      // Each fog volume has its own temporal behavior
+      breathRate: 0.0008 + Math.random() * 0.002,
+      breathAmp: 0.3 + Math.random() * 0.5,
     });
   }
 }
 
-function updateFog(time) {
-  fogCtx.clearRect(0, 0, fogCanvas.width, fogCanvas.height);
-
-  for (const p of fogParticles) {
-    // Mouse repulsion
-    const dx = p.x - mouseX;
-    const dy = p.y - mouseY;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < 200) {
-      const force = (200 - dist) / 200 * 0.5;
-      p.x += (dx / dist) * force;
-      p.y += (dy / dist) * force;
-    }
-
-    p.x += p.vx + Math.sin(time * 0.001 + p.phase) * 0.2;
-    p.y += p.vy + Math.cos(time * 0.0008 + p.phase) * 0.1;
-
-    // Wrap
-    if (p.x < -p.radius) p.x = fogCanvas.width + p.radius;
-    if (p.x > fogCanvas.width + p.radius) p.x = -p.radius;
-    if (p.y < -p.radius) p.y = fogCanvas.height + p.radius;
-    if (p.y > fogCanvas.height + p.radius) p.y = -p.radius;
-
-    const grad = fogCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-    const flickerOpacity = p.opacity * (0.7 + 0.3 * Math.sin(time * 0.002 + p.phase));
-    grad.addColorStop(0, `rgba(180, 170, 150, ${flickerOpacity})`);
-    grad.addColorStop(0.5, `rgba(140, 130, 120, ${flickerOpacity * 0.5})`);
-    grad.addColorStop(1, 'rgba(100, 90, 80, 0)');
-
-    fogCtx.fillStyle = grad;
-    fogCtx.fillRect(p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
+// --- Shadow forms (Layer 3) ---
+// Shapes that never resolve — they suggest figures, pillars,
+// corridors, but dissolve before recognition
+let shadowForms = [];
+function initShadowForms() {
+  shadowForms = [];
+  for (let i = 0; i < 8; i++) {
+    shadowForms.push({
+      x: Math.random() * bgCanvas.width,
+      y: bgCanvas.height * (0.3 + Math.random() * 0.5),
+      width: 20 + Math.random() * 60,
+      height: 100 + Math.random() * 300,
+      drift: (Math.random() - 0.5) * 0.08,
+      opacity: 0.01 + Math.random() * 0.03,
+      phase: Math.random() * Math.PI * 2,
+      // Some forms move only when not being looked at
+      shyness: Math.random(),
+    });
   }
 }
 
-// ============================================================
-// SWORD CANVAS SYSTEM
-// ============================================================
-const swordCanvas = document.getElementById('sword-canvas');
-const swordCtx = swordCanvas.getContext('2d');
-
-function initSwordCanvas() {
-  swordCanvas.width = window.innerWidth;
-  swordCanvas.height = window.innerHeight;
+// --- Interference scratches (Layer 5) ---
+// Subtle marks that slide across the viewport
+let scratches = [];
+function initScratches() {
+  scratches = [];
+  for (let i = 0; i < 12; i++) {
+    scratches.push({
+      x: Math.random() * bgCanvas.width,
+      y: Math.random() * bgCanvas.height,
+      angle: Math.random() * Math.PI,
+      length: 50 + Math.random() * 200,
+      speed: 0.02 + Math.random() * 0.08,
+      opacity: 0.01 + Math.random() * 0.04,
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
 }
 
-function drawSword(progress, targetX) {
-  swordCtx.clearRect(0, 0, swordCanvas.width, swordCanvas.height);
-
-  const cx = targetX || swordCanvas.width / 2;
-  const swordLength = swordCanvas.height * 0.6;
-  const swordWidth = 14;
-
-  // Sword descends from above
-  const tipY = -swordLength + progress * (swordCanvas.height * 0.55 + swordLength);
-  const handleY = tipY - swordLength;
-
-  // Blade
-  swordCtx.save();
-  swordCtx.strokeStyle = 'rgba(160, 155, 140, 0.8)';
-  swordCtx.lineWidth = swordWidth;
-  swordCtx.lineCap = 'butt';
-  swordCtx.shadowColor = 'rgba(196, 184, 154, 0.3)';
-  swordCtx.shadowBlur = 20;
-
-  swordCtx.beginPath();
-  swordCtx.moveTo(cx, handleY);
-  swordCtx.lineTo(cx, tipY);
-  swordCtx.stroke();
-
-  // Blade edge highlight
-  swordCtx.strokeStyle = 'rgba(220, 215, 200, 0.4)';
-  swordCtx.lineWidth = 2;
-  swordCtx.beginPath();
-  swordCtx.moveTo(cx, handleY);
-  swordCtx.lineTo(cx, tipY);
-  swordCtx.stroke();
-
-  // Crossguard
-  const guardY = handleY + swordLength * 0.15;
-  swordCtx.strokeStyle = 'rgba(107, 90, 46, 0.7)';
-  swordCtx.lineWidth = 8;
-  swordCtx.beginPath();
-  swordCtx.moveTo(cx - 40, guardY);
-  swordCtx.lineTo(cx + 40, guardY);
-  swordCtx.stroke();
-
-  // Handle wrap
-  swordCtx.strokeStyle = 'rgba(74, 42, 26, 0.6)';
-  swordCtx.lineWidth = swordWidth + 4;
-  swordCtx.beginPath();
-  swordCtx.moveTo(cx, handleY);
-  swordCtx.lineTo(cx, guardY);
-  swordCtx.stroke();
-
-  // Pommel
-  swordCtx.fillStyle = 'rgba(107, 90, 46, 0.6)';
-  swordCtx.beginPath();
-  swordCtx.arc(cx, handleY - 5, 10, 0, Math.PI * 2);
-  swordCtx.fill();
-
-  // Tip point
-  swordCtx.fillStyle = 'rgba(200, 195, 180, 0.9)';
-  swordCtx.beginPath();
-  swordCtx.moveTo(cx - swordWidth/2, tipY);
-  swordCtx.lineTo(cx, tipY + 20);
-  swordCtx.lineTo(cx + swordWidth/2, tipY);
-  swordCtx.closePath();
-  swordCtx.fill();
-
-  swordCtx.restore();
+// --- Light sources (Layer 4) ---
+// Flickering, unreliable light that comes from no visible source
+let lightSources = [];
+function initLightSources() {
+  lightSources = [];
+  for (let i = 0; i < 4; i++) {
+    lightSources.push({
+      x: bgCanvas.width * (0.15 + Math.random() * 0.7),
+      y: bgCanvas.height * (0.1 + Math.random() * 0.4),
+      r: 150 + Math.random() * 250,
+      baseOpacity: 0.01 + Math.random() * 0.02,
+      flickerRate: 0.5 + Math.random() * 3,
+      flickerDepth: 0.3 + Math.random() * 0.6,
+      phase: Math.random() * Math.PI * 2,
+      // Lights can shift position slightly, impossibly
+      driftX: (Math.random() - 0.5) * 0.3,
+      driftY: (Math.random() - 0.5) * 0.15,
+    });
+  }
 }
 
-function clearSword() {
-  swordCtx.clearRect(0, 0, swordCanvas.width, swordCanvas.height);
-}
+// Master render function for the background entity
+function renderBackground(time) {
+  bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+  const d = DREAD.level;
 
-// ============================================================
-// CRACK SYSTEM
-// ============================================================
-function createCrack(originX, originY) {
-  const numBranches = 3 + Math.floor(Math.random() * 4);
-
-  for (let b = 0; b < numBranches; b++) {
-    const angle = (Math.PI * 2 / numBranches) * b + (Math.random() - 0.5) * 0.8;
-    const length = 100 + Math.random() * 300;
-    const segments = 5 + Math.floor(Math.random() * 8);
-
-    let x = originX;
-    let y = originY;
-
-    for (let s = 0; s < segments; s++) {
-      const segLen = length / segments;
-      const segAngle = angle + (Math.random() - 0.5) * 0.6;
-      const endX = x + Math.cos(segAngle) * segLen;
-      const endY = y + Math.sin(segAngle) * segLen;
-
-      const crack = document.createElement('div');
-      crack.className = 'crack-line';
-      const dx = endX - x;
-      const dy = endY - y;
-      const segActualLen = Math.sqrt(dx*dx + dy*dy);
-      const segActualAngle = Math.atan2(dy, dx);
-
-      crack.style.left = x + 'px';
-      crack.style.top = y + 'px';
-      crack.style.width = segActualLen + 'px';
-      crack.style.height = (1 + Math.random() * 2) + 'px';
-      crack.style.transformOrigin = '0 0';
-      crack.style.transform = `rotate(${segActualAngle}rad)`;
-      crack.style.opacity = 0.1 + Math.random() * 0.15;
-
-      document.body.appendChild(crack);
-
-      // Animate in with delay
-      crack.style.transition = `opacity 0.3s ease ${s * 0.05}s`;
-      requestAnimationFrame(() => {
-        crack.style.opacity = String(0.05 + Math.random() * 0.1);
-      });
-
-      x = endX;
-      y = endY;
+  // --- FOG VOLUMES ---
+  for (const f of fogVolumes) {
+    // Mouse repulsion — fog recoils from cursor
+    const fdx = f.x - mx, fdy = f.y - my;
+    const fdist = Math.sqrt(fdx*fdx + fdy*fdy);
+    if (fdist < 250) {
+      const force = (250 - fdist) / 250 * 0.6;
+      f.x += (fdx/fdist) * force;
+      f.y += (fdy/fdist) * force;
     }
+
+    f.x += f.vx + Math.sin(time * f.breathRate + f.phase) * 0.15;
+    f.y += f.vy + Math.cos(time * f.breathRate * 0.7 + f.phase) * 0.08;
+
+    // Wrapping
+    if (f.x < -f.r) f.x = bgCanvas.width + f.r;
+    if (f.x > bgCanvas.width + f.r) f.x = -f.r;
+    if (f.y < -f.r) f.y = bgCanvas.height + f.r;
+    if (f.y > bgCanvas.height + f.r) f.y = -f.r;
+
+    const breath = f.breathAmp * Math.sin(time * f.breathRate + f.phase);
+    const op = f.opacity * (0.6 + 0.4 * breath) * (1 + d * 0.5);
+
+    const grad = bgCtx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r);
+    grad.addColorStop(0, `rgba(160,150,130,${op})`);
+    grad.addColorStop(0.4, `rgba(120,110,100,${op*0.5})`);
+    grad.addColorStop(1, 'rgba(80,70,60,0)');
+    bgCtx.fillStyle = grad;
+    bgCtx.fillRect(f.x - f.r, f.y - f.r, f.r*2, f.r*2);
   }
 
-  // Add glow at origin
-  const glow = document.createElement('div');
-  glow.className = 'crack-glow';
-  glow.style.left = (originX - 50) + 'px';
-  glow.style.top = (originY - 50) + 'px';
-  glow.style.width = '100px';
-  glow.style.height = '100px';
-  document.body.appendChild(glow);
+  // --- SHADOW FORMS ---
+  // These suggest architecture — pillars, doorways, figures
+  for (const s of shadowForms) {
+    // Shy forms drift away from cursor gaze
+    const sdx = s.x - mx;
+    const sdist = Math.abs(sdx);
+    if (sdist < 300 && s.shyness > 0.5) {
+      s.opacity *= 0.995; // Fade when looked at
+    } else {
+      s.opacity = Math.min(0.04, s.opacity + 0.0001);
+    }
+
+    s.x += s.drift + Math.sin(time * 0.0003 + s.phase) * 0.05;
+    if (s.x < -100) s.x = bgCanvas.width + 50;
+    if (s.x > bgCanvas.width + 100) s.x = -50;
+
+    const wobble = Math.sin(time * 0.001 + s.phase) * 3 * (1 + d);
+    const op = s.opacity * (1 + d * 2);
+
+    bgCtx.fillStyle = `rgba(10,9,7,${op})`;
+    bgCtx.fillRect(
+      s.x + wobble - s.width/2,
+      s.y - s.height/2,
+      s.width,
+      s.height
+    );
+
+    // Soft edge
+    const sg = bgCtx.createRadialGradient(
+      s.x + wobble, s.y,
+      s.width * 0.3,
+      s.x + wobble, s.y,
+      s.width * 2
+    );
+    sg.addColorStop(0, `rgba(5,4,3,${op*0.5})`);
+    sg.addColorStop(1, 'rgba(5,4,3,0)');
+    bgCtx.fillStyle = sg;
+    bgCtx.fillRect(s.x + wobble - s.width*2, s.y - s.height/2, s.width*4, s.height);
+  }
+
+  // --- LIGHT SOURCES ---
+  const lightDiv = document.getElementById('bg-light-sources');
+  let lightGradients = '';
+  for (const l of lightSources) {
+    l.x += l.driftX + Math.sin(time * 0.0005 + l.phase) * 0.1;
+    l.y += l.driftY + Math.cos(time * 0.0004 + l.phase) * 0.05;
+
+    // Complex flicker — multiple overlapping rates
+    const flicker1 = Math.sin(time * l.flickerRate * 0.001 + l.phase);
+    const flicker2 = Math.sin(time * l.flickerRate * 0.0037 + l.phase * 1.7);
+    const flicker3 = Math.random() > 0.98 ? 0.1 : 1; // Occasional sudden dim
+    const flicker = (flicker1 * 0.4 + flicker2 * 0.3 + 0.3) * l.flickerDepth * flicker3;
+    const op = l.baseOpacity * flicker * (1 - d * 0.3);
+
+    const px = (l.x / bgCanvas.width * 100);
+    const py = (l.y / bgCanvas.height * 100);
+    lightGradients += `radial-gradient(ellipse at ${px}% ${py}%, rgba(180,160,120,${op}) 0%, transparent ${l.r/bgCanvas.width*100}%),`;
+  }
+  lightDiv.style.background = lightGradients.slice(0,-1) || 'none';
+
+  // --- SCRATCHES on interference layer ---
+  const interferenceDiv = document.getElementById('bg-interference');
+  let scratchGradients = '';
+  for (const sc of scratches) {
+    sc.x += sc.speed;
+    sc.y += sc.speed * 0.3;
+    if (sc.x > bgCanvas.width + 100) { sc.x = -100; sc.y = Math.random() * bgCanvas.height; }
+
+    const wobble = Math.sin(time * 0.002 + sc.phase) * 2;
+    const op = sc.opacity * (1 + d);
+    const px = ((sc.x + wobble) / bgCanvas.width * 100);
+    const py = (sc.y / bgCanvas.height * 100);
+    scratchGradients += `linear-gradient(${sc.angle}rad, transparent, rgba(196,184,154,${op}) 40%, rgba(196,184,154,${op}) 60%, transparent) no-repeat ${px}% ${py}% / ${sc.length}px 1px,`;
+  }
+  interferenceDiv.style.background = scratchGradients.slice(0,-1) || 'none';
 }
 
-// ============================================================
+// --- Architecture layer parallax ---
+// Subtly shifts based on mouse, but with instability
+function updateArchitecture(time) {
+  const archDiv = document.getElementById('bg-architecture');
+  const parallaxX = (mx - bgCanvas.width/2) * 0.008;
+  const parallaxY = (my - bgCanvas.height/2) * 0.005;
+  // Add dread-based instability — the space breathes
+  const breathX = Math.sin(time * 0.0004) * 2 * (1 + DREAD.level * 3);
+  const breathY = Math.cos(time * 0.0003) * 1.5 * (1 + DREAD.level * 2);
+  // Occasional judder
+  const judderX = DREAD.level > 0.3 && Math.random() > 0.995 ? (Math.random()-0.5) * 4 : 0;
+  const judderY = DREAD.level > 0.3 && Math.random() > 0.995 ? (Math.random()-0.5) * 3 : 0;
+
+  archDiv.style.transform = `translate(${parallaxX + breathX + judderX}px, ${parallaxY + breathY + judderY}px)`;
+  archDiv.style.opacity = 0.03 + DREAD.level * 0.02;
+
+  // Architecture content — procedural columns and arches
+  // Regenerated occasionally to prevent pattern recognition
+  if (!archDiv._drawn) {
+    archDiv._drawn = true;
+    let archBg = '';
+    for (let i = 0; i < 15; i++) {
+      const px = 5 + Math.random() * 90;
+      const py = Math.random() * 100;
+      const w = 1 + Math.random() * 3;
+      const h = 20 + Math.random() * 60;
+      archBg += `linear-gradient(180deg, transparent, rgba(196,184,154,0.3) 20%, rgba(196,184,154,0.3) 80%, transparent) no-repeat ${px}% ${py}% / ${w}px ${h}%,`;
+    }
+    // Horizontal elements — floors, ceilings
+    for (let i = 0; i < 5; i++) {
+      const py = 20 + Math.random() * 60;
+      archBg += `linear-gradient(90deg, transparent 10%, rgba(196,184,154,0.15) 30%, rgba(196,184,154,0.15) 70%, transparent 90%) no-repeat 0 ${py}% / 100% 1px,`;
+    }
+    archDiv.style.background = archBg.slice(0,-1);
+  }
+}
+
+// ================================================================
+// SILENT HILL DISTORTION SYSTEM
+// ================================================================
+// Perceptual instability that operates below conscious threshold.
+// The user should not be certain these effects are happening.
+
+function applyDistortions(time) {
+  const d = DREAD.level;
+
+  // --- Vignette breathing ---
+  const vignetteDiv = document.getElementById('bg-vignette');
+  const vigBreath = 0.5 + Math.sin(time * 0.0005) * 0.1 * (1 + d * 2);
+  vignetteDiv.style.background = `radial-gradient(ellipse at ${50 + Math.sin(time*0.0003)*2}% ${50 + Math.cos(time*0.0004)*1.5}%, transparent ${20 - d*5}%, rgba(0,0,0,${vigBreath}) ${55 - d*10}%, rgba(0,0,0,${0.9 + d*0.08}) 100%)`;
+
+  // --- Grain intensity fluctuation ---
+  const grainDiv = document.getElementById('bg-grain');
+  const grainBase = 0.06 + d * 0.06;
+  const grainPulse = Math.sin(time * 0.002) * 0.02;
+  grainDiv.style.opacity = grainBase + grainPulse;
+
+  // --- Subtle screen warp at high dread ---
+  // This uses the filter property to slightly distort perception
+  if (d > 0.2) {
+    const warpAmount = (d - 0.2) * 0.5;
+    const blurPulse = Math.sin(time * 0.001 + Math.random() * 0.1) * warpAmount * 0.5;
+    document.body.style.filter = `blur(${Math.max(0, blurPulse)}px) contrast(${1 + warpAmount * 0.05}) brightness(${1 - warpAmount * 0.05})`;
+  }
+
+  // --- Idle darkness: circle of light around cursor shrinks ---
+  const idleDiv = document.getElementById('idle-darkness');
+  if (DREAD.idleDuration > 8) {
+    const idleProgress = Math.min(1, (DREAD.idleDuration - 8) / 60);
+    idleDiv.style.setProperty('--ix', mx / window.innerWidth * 100 + '%');
+    idleDiv.style.setProperty('--iy', my / window.innerHeight * 100 + '%');
+    idleDiv.style.opacity = idleProgress * 0.7;
+    idleDiv.style.background = `radial-gradient(circle at var(--ix) var(--iy), transparent ${15 - idleProgress * 12}%, rgba(0,0,0,${0.3 + idleProgress * 0.5}) ${30 - idleProgress * 20}%, rgba(0,0,0,${0.8 + idleProgress * 0.2}) 100%)`;
+  } else {
+    idleDiv.style.opacity = Math.max(0, parseFloat(idleDiv.style.opacity || 0) - 0.01);
+  }
+
+  // --- Occasional impossible events ---
+  // Things that happen so subtly the user doubts they occurred
+
+  // Scanline offset glitch
+  if (d > 0.15 && Math.random() > 0.997) {
+    const scanlines = document.getElementById('bg-scanlines');
+    scanlines.style.transform = `translateY(${(Math.random()-0.5) * 3}px)`;
+    setTimeout(() => { scanlines.style.transform = ''; }, 50 + Math.random() * 150);
+  }
+
+  // Grain layer sudden intensity spike
+  if (d > 0.25 && Math.random() > 0.998) {
+    grainDiv.style.opacity = '0.2';
+    setTimeout(() => { grainDiv.style.opacity = grainBase; }, 30 + Math.random() * 80);
+  }
+
+  // Momentary brightness inversion
+  if (d > 0.4 && Math.random() > 0.9995) {
+    document.body.style.filter = `invert(0.03) brightness(0.95)`;
+    setTimeout(() => { document.body.style.filter = ''; }, 20);
+  }
+}
+
+// ================================================================
+// FX CANVAS - Particles, debris, and persistent damage
+// ================================================================
+let particles = [];
+
+function spawnParticle(x, y, type = 'dust') {
+  const angle = Math.random() * Math.PI * 2;
+  const speed = type === 'ember' ? 2 + Math.random() * 5 : 0.2 + Math.random() * 0.8;
+  particles.push({
+    x, y,
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed - (type === 'ember' ? 3 : 0),
+    life: type === 'ember' ? 0.8 + Math.random() * 1 : 2 + Math.random() * 4,
+    age: 0,
+    type,
+    size: type === 'ember' ? 2 + Math.random() * 2 : 0.5 + Math.random() * 1.5,
+    color: type === 'ember' ? [139,32,32] : [160,150,130],
+  });
+}
+
+function updateParticles(dt) {
+  fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+
+  // Ambient dust spawning — increases with dread
+  if (Math.random() < 0.02 + DREAD.level * 0.05) {
+    spawnParticle(
+      Math.random() * fxCanvas.width,
+      Math.random() * fxCanvas.height,
+      'dust'
+    );
+  }
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.age += dt;
+    if (p.age >= p.life) {
+      particles.splice(i, 1);
+      continue;
+    }
+
+    const progress = p.age / p.life;
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.type === 'ember') p.vy += 0.05; // gravity
+
+    // Mouse interaction — particles drift away from cursor
+    const pdx = p.x - mx, pdy = p.y - my;
+    const pdist = Math.sqrt(pdx*pdx + pdy*pdy);
+    if (pdist < 100) {
+      p.x += (pdx/pdist) * 0.3;
+      p.y += (pdy/pdist) * 0.3;
+    }
+
+    const alpha = (1 - progress) * (p.type === 'ember' ? 0.7 : 0.15);
+    fxCtx.fillStyle = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${alpha})`;
+
+    if (p.type === 'ember') {
+      fxCtx.shadowColor = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${alpha*0.5})`;
+      fxCtx.shadowBlur = 6;
+    } else {
+      fxCtx.shadowBlur = 0;
+    }
+
+    fxCtx.beginPath();
+    fxCtx.arc(p.x, p.y, p.size * (1 - progress * 0.5), 0, Math.PI * 2);
+    fxCtx.fill();
+  }
+  fxCtx.shadowBlur = 0;
+}
+
+// ================================================================
+// VOID INTERACTION SYSTEM
+// ================================================================
+// Clicking empty space is not nothing. The void responds.
+document.addEventListener('click', e => {
+  DREAD.activity();
+  audio.init();
+
+  // Check if we clicked on a non-interactive area
+  const tag = e.target.tagName.toLowerCase();
+  const isVoid = tag === 'body' || tag === 'div' && !e.target.closest('.candidate, .gate-seal, .reg-seal, .reg-input');
+
+  if (isVoid) {
+    // Void ripple
+    const ripple = document.createElement('div');
+    ripple.className = 'void-ripple';
+    ripple.style.left = e.clientX + 'px';
+    ripple.style.top = e.clientY + 'px';
+    document.body.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 2000);
+
+    // Spawn dust at click point
+    for (let i = 0; i < 5; i++) spawnParticle(e.clientX, e.clientY, 'dust');
+
+    // Chance of audio hallucination
+    if (Math.random() < 0.3 + DREAD.level * 0.3) {
+      audio.hallucination();
+    }
+
+    // Chance of environmental disturbance
+    if (Math.random() < 0.15 + DREAD.level * 0.2) {
+      screenFlash(20, 0.02);
+    }
+
+    DREAD.add(0.005);
+  }
+});
+
+// ================================================================
+// GHOST TEXT SYSTEM
+// ================================================================
+// Occasionally, text appears at the edges of perception
+// and fades before it can be read
+const GHOST_PHRASES = [
+  'do you see it', 'behind you', 'it watches', 'not yet',
+  'remember', 'you chose this', 'the walls know',
+  'it was always here', 'look closer', 'turn back',
+  'the seal is broken', 'you cannot leave', 'it follows',
+];
+
+function spawnGhostText() {
+  if (DREAD.level < 0.1) return;
+
+  const text = document.createElement('div');
+  text.className = 'ghost-text';
+  text.textContent = GHOST_PHRASES[Math.floor(Math.random() * GHOST_PHRASES.length)];
+  text.style.left = (10 + Math.random() * 80) + '%';
+  text.style.top = (10 + Math.random() * 80) + '%';
+  document.body.appendChild(text);
+
+  setTimeout(() => text.classList.add('visible'), 100);
+  setTimeout(() => {
+    text.classList.remove('visible');
+    text.classList.add('fading');
+  }, 2000 + Math.random() * 4000);
+  setTimeout(() => text.remove(), 12000);
+}
+
+// ================================================================
+// OCCLUDING FOREGROUND ELEMENTS
+// ================================================================
+// At higher dread, dark shapes begin to encroach from edges
+function spawnOccluder() {
+  if (DREAD.level < 0.2) return;
+
+  const occ = document.createElement('div');
+  occ.className = 'fg-occluder';
+
+  const side = Math.floor(Math.random() * 4);
+  const size = 100 + Math.random() * 300;
+
+  if (side === 0) { // top
+    occ.style.top = '0'; occ.style.left = Math.random()*80+'%';
+    occ.style.width = size+'px'; occ.style.height = (size*0.4)+'px';
+    occ.style.background = `linear-gradient(180deg, rgba(5,4,3,${0.1 + DREAD.level*0.3}) 0%, transparent 100%)`;
+  } else if (side === 1) { // bottom
+    occ.style.bottom = '0'; occ.style.left = Math.random()*80+'%';
+    occ.style.width = size+'px'; occ.style.height = (size*0.4)+'px';
+    occ.style.background = `linear-gradient(0deg, rgba(5,4,3,${0.1 + DREAD.level*0.3}) 0%, transparent 100%)`;
+  } else if (side === 2) { // left
+    occ.style.left = '0'; occ.style.top = Math.random()*80+'%';
+    occ.style.width = (size*0.4)+'px'; occ.style.height = size+'px';
+    occ.style.background = `linear-gradient(90deg, rgba(5,4,3,${0.1 + DREAD.level*0.3}) 0%, transparent 100%)`;
+  } else { // right
+    occ.style.right = '0'; occ.style.top = Math.random()*80+'%';
+    occ.style.width = (size*0.4)+'px'; occ.style.height = size+'px';
+    occ.style.background = `linear-gradient(270deg, rgba(5,4,3,${0.1 + DREAD.level*0.3}) 0%, transparent 100%)`;
+  }
+
+  document.body.appendChild(occ);
+  setTimeout(() => { occ.style.opacity = 0.3 + DREAD.level * 0.5; }, 100);
+  setTimeout(() => { occ.style.opacity = '0'; }, 6000 + Math.random() * 8000);
+  setTimeout(() => occ.remove(), 18000);
+}
+
+// ================================================================
 // SCREEN EFFECTS
-// ============================================================
+// ================================================================
 function screenShake(level = 1) {
-  document.body.classList.remove('shake-1', 'shake-2', 'shake-3');
+  document.body.classList.remove('shake-1','shake-2','shake-3');
   void document.body.offsetWidth;
-  document.body.classList.add(`shake-${Math.min(level, 3)}`);
-  setTimeout(() => document.body.classList.remove(`shake-${Math.min(level, 3)}`), 600);
+  document.body.classList.add(`shake-${Math.min(level,3)}`);
+  setTimeout(() => document.body.classList.remove(`shake-${Math.min(level,3)}`), 600);
 }
 
-function screenFlash(duration = 150, opacity = 0.15) {
-  const flash = document.getElementById('flash-overlay');
-  flash.style.opacity = opacity;
-  setTimeout(() => { flash.style.opacity = 0; }, duration);
+function screenFlash(duration = 100, opacity = 0.1) {
+  const f = document.getElementById('flash-overlay');
+  f.style.opacity = opacity;
+  setTimeout(() => { f.style.opacity = '0'; }, duration);
 }
 
 function bloodDrip(x) {
-  const drip = document.createElement('div');
-  drip.className = 'blood-drip';
-  drip.style.left = x + 'px';
-  drip.style.top = '0px';
-  drip.style.height = (100 + Math.random() * 300) + 'px';
-  document.body.appendChild(drip);
-  setTimeout(() => drip.remove(), 3000);
+  const d = document.createElement('div');
+  d.className = 'blood-drip';
+  d.style.left = x + 'px';
+  d.style.top = '0';
+  d.style.height = (80 + Math.random() * 350) + 'px';
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 3500);
 }
 
-function spawnEmbers(originX, originY, count = 15) {
+function spawnEmbers(ox, oy, count = 20) {
   for (let i = 0; i < count; i++) {
-    const ember = document.createElement('div');
-    ember.className = 'ember';
-    ember.style.left = originX + 'px';
-    ember.style.top = originY + 'px';
+    setTimeout(() => spawnParticle(ox + (Math.random()-0.5)*20, oy + (Math.random()-0.5)*20, 'ember'), i * 25);
+  }
+}
 
-    const angle = Math.random() * Math.PI * 2;
-    const velocity = 2 + Math.random() * 5;
-    const vx = Math.cos(angle) * velocity;
-    const vy = Math.sin(angle) * velocity - 3; // upward bias
-    const life = 800 + Math.random() * 1200;
-    const startTime = performance.now();
+function createCrack(ox, oy) {
+  const branches = 3 + Math.floor(Math.random() * 4);
+  for (let b = 0; b < branches; b++) {
+    const angle = (Math.PI * 2 / branches) * b + (Math.random()-0.5) * 0.8;
+    const length = 80 + Math.random() * 350;
+    const segs = 4 + Math.floor(Math.random() * 8);
+    let x = ox, y = oy;
 
-    document.body.appendChild(ember);
+    for (let s = 0; s < segs; s++) {
+      const segLen = length / segs;
+      const segAngle = angle + (Math.random()-0.5) * 0.7;
+      const ex = x + Math.cos(segAngle) * segLen;
+      const ey = y + Math.sin(segAngle) * segLen;
 
-    function animateEmber(now) {
-      const elapsed = now - startTime;
-      const progress = elapsed / life;
-      if (progress >= 1) {
-        ember.remove();
-        return;
-      }
+      const crack = document.createElement('div');
+      crack.className = 'permanent-crack';
+      const cdx = ex - x, cdy = ey - y;
+      const cLen = Math.sqrt(cdx*cdx + cdy*cdy);
+      const cAngle = Math.atan2(cdy, cdx);
 
-      const x = originX + vx * elapsed * 0.05;
-      const y = originY + vy * elapsed * 0.05 + 0.5 * 0.001 * elapsed * elapsed; // gravity
-      ember.style.left = x + 'px';
-      ember.style.top = y + 'px';
-      ember.style.opacity = Math.max(0, 0.8 * (1 - progress));
-      ember.style.transform = `scale(${1 - progress * 0.5})`;
+      crack.style.left = x + 'px';
+      crack.style.top = y + 'px';
+      crack.style.width = cLen + 'px';
+      crack.style.height = (1 + Math.random() * 2) + 'px';
+      crack.style.transform = `rotate(${cAngle}rad)`;
+      crack.style.opacity = '0';
+      document.body.appendChild(crack);
 
-      requestAnimationFrame(animateEmber);
+      setTimeout(() => {
+        crack.style.transition = `opacity 0.3s ease ${s*0.04}s`;
+        crack.style.opacity = String(0.03 + Math.random() * 0.08);
+      }, 10);
+
+      x = ex; y = ey;
     }
-
-    setTimeout(() => requestAnimationFrame(animateEmber), i * 30);
   }
 }
 
 function createPermanentScars() {
-  // Horizontal scars
   for (let i = 0; i < 3; i++) {
-    const scar = document.createElement('div');
-    scar.className = 'scar-mark horizontal';
-    scar.style.top = (20 + Math.random() * 60) + '%';
-    scar.style.left = '0';
-    document.body.appendChild(scar);
+    const s = document.createElement('div');
+    s.className = 'permanent-scar-h';
+    s.style.top = (15 + Math.random() * 70) + '%';
+    document.body.appendChild(s);
   }
-  // Vertical scars
   for (let i = 0; i < 2; i++) {
-    const scar = document.createElement('div');
-    scar.className = 'scar-mark vertical';
-    scar.style.left = (20 + Math.random() * 60) + '%';
-    scar.style.top = '0';
-    document.body.appendChild(scar);
+    const s = document.createElement('div');
+    s.className = 'permanent-scar-v';
+    s.style.left = (15 + Math.random() * 70) + '%';
+    document.body.appendChild(s);
   }
 }
 
-// ============================================================
-// CURSOR
-// ============================================================
-document.addEventListener('mousemove', (e) => {
-  const cursor = document.getElementById('cursor');
-  cursor.style.left = e.clientX + 'px';
-  cursor.style.top = e.clientY + 'px';
-  mouseX = e.clientX;
-  mouseY = e.clientY;
+// ================================================================
+// IDENTITY SYSTEM (FINGERPRINT + LOCALSTORAGE)
+// ================================================================
+function generateFingerprint() {
+  const c = document.createElement('canvas');
+  const ctx = c.getContext('2d');
+  ctx.textBaseline = 'top';
+  ctx.font = '14px Arial';
+  ctx.fillText('judgment', 2, 2);
+  const cd = c.toDataURL();
+  const data = [
+    navigator.userAgent, navigator.language,
+    screen.width+'x'+screen.height, screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency || 'x',
+    cd.slice(-60)
+  ].join('|');
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    hash = ((hash << 5) - hash) + data.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return 'fp_' + Math.abs(hash).toString(36);
+}
 
-  // Distortion follows cursor subtly
-  const distortion = document.getElementById('distortion-overlay');
-  distortion.style.setProperty('--dx', e.clientX / window.innerWidth * 100 + '%');
-  distortion.style.setProperty('--dy', e.clientY / window.innerHeight * 100 + '%');
-});
+function getIdentity() {
+  const raw = localStorage.getItem(KEYS.identity);
+  return raw ? JSON.parse(raw) : null;
+}
 
-// ============================================================
+function setIdentity(name) {
+  const identity = {
+    name,
+    fp: generateFingerprint(),
+    branded: Date.now(),
+    interactionCount: 0,
+  };
+  localStorage.setItem(KEYS.identity, JSON.stringify(identity));
+  return identity;
+}
+
+function hasVoted() {
+  return !!(localStorage.getItem(KEYS.vote) || sessionStorage.getItem(KEYS.vote));
+}
+
+function recordVote(candidateName, identity) {
+  const data = {
+    candidate: candidateName,
+    identity: identity.name,
+    fp: generateFingerprint(),
+    timestamp: Date.now(),
+  };
+  localStorage.setItem(KEYS.vote, JSON.stringify(data));
+  sessionStorage.setItem(KEYS.vote, JSON.stringify(data));
+  localStorage.setItem(KEYS.fp, data.fp);
+  localStorage.setItem(KEYS.damage, String(Math.min(1, DREAD.level + 0.3)));
+}
+
+function getVoteData() {
+  const raw = localStorage.getItem(KEYS.vote);
+  return raw ? JSON.parse(raw) : null;
+}
+
+// ================================================================
+// REGISTRATION RITUAL
+// ================================================================
+// Registration is not account creation. It is branding.
+// Each character typed is felt. The name is burned, not entered.
+
+let regActive = false;
+let regName = '';
+let regSealProgress = 0;
+let regSealTimer = null;
+let regTypingBlocked = false;
+
+function showRegistration() {
+  const scene = document.getElementById('registration-scene');
+  scene.classList.remove('hidden');
+  regActive = true;
+
+  // Staggered reveal of elements
+  const title = document.getElementById('reg-title');
+  const subtitle = document.getElementById('reg-subtitle');
+  const inputCont = document.getElementById('reg-input-container');
+  const brandLine = document.getElementById('reg-brand-line');
+
+  setTimeout(() => { title.style.transition = 'opacity 3s'; title.style.opacity = '0.6'; }, 500);
+  setTimeout(() => { subtitle.style.transition = 'opacity 3s'; subtitle.style.opacity = '1'; }, 2000);
+  setTimeout(() => {
+    inputCont.style.transition = 'opacity 2s';
+    inputCont.style.opacity = '1';
+    document.getElementById('reg-input').focus();
+  }, 4000);
+
+  // Input handling with resistance
+  const input = document.getElementById('reg-input');
+  const echo = document.getElementById('reg-char-echo');
+
+  input.addEventListener('keydown', e => {
+    if (regTypingBlocked) {
+      e.preventDefault();
+      return;
+    }
+
+    audio.init();
+
+    // Resistance: brief delay before character appears
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      regTypingBlocked = true;
+
+      // Visual strain
+      screenFlash(15, 0.02);
+      audio.charBrand();
+      DREAD.add(0.003);
+
+      // Delayed character entry — the site resists input
+      const delay = 60 + Math.random() * 120 + DREAD.level * 100;
+      setTimeout(() => {
+        if (input.value.length < 16) {
+          input.value += e.key;
+          regName = input.value;
+
+          // Echo the character in blood below
+          echo.textContent = regName.split('').join(' ');
+          echo.style.color = `rgba(139,32,32,${0.15 + DREAD.level * 0.15})`;
+
+          // Brand line grows with each character
+          brandLine.style.opacity = '1';
+          brandLine.style.width = Math.min(320, regName.length * 22) + 'px';
+
+          // Show seal when name is long enough
+          if (regName.length >= 2) {
+            const seal = document.getElementById('reg-seal');
+            seal.style.transition = 'opacity 1.5s';
+            seal.style.opacity = '1';
+          }
+        }
+        regTypingBlocked = false;
+      }, delay);
+    }
+
+    // Backspace — punitive
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      if (input.value.length > 0) {
+        audio.errorReject();
+        screenShake(1);
+        DREAD.add(0.008);
+
+        // Deleting is painful — longer delay
+        regTypingBlocked = true;
+        setTimeout(() => {
+          input.value = input.value.slice(0, -1);
+          regName = input.value;
+          echo.textContent = regName.split('').join(' ');
+          brandLine.style.width = Math.min(320, regName.length * 22) + 'px';
+          if (regName.length < 2) {
+            document.getElementById('reg-seal').style.opacity = '0';
+          }
+          regTypingBlocked = false;
+        }, 200 + Math.random() * 200);
+      }
+    }
+
+    // Enter — does nothing. You must use the seal.
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (regName.length < 2) {
+        showRegError('The hall rejects silence');
+      }
+    }
+  });
+
+  // Registration seal — hold to brand
+  initRegSeal();
+}
+
+function showRegError(msg) {
+  const errEl = document.getElementById('reg-error');
+  errEl.textContent = msg;
+  errEl.style.opacity = '0.7';
+  audio.errorReject();
+  screenShake(1);
+  DREAD.add(0.01);
+  setTimeout(() => { errEl.style.opacity = '0'; }, 2000);
+}
+
+function initRegSeal() {
+  const seal = document.getElementById('reg-seal');
+  const circle = seal.querySelector('.reg-seal-progress circle');
+  const totalLen = 340;
+
+  const startHold = (e) => {
+    e.preventDefault();
+    audio.init();
+
+    if (regName.length < 2) {
+      showRegError('A name must have weight');
+      return;
+    }
+
+    audio.metalScrape(2.8);
+    seal.classList.add('pressing');
+
+    regSealTimer = setInterval(() => {
+      regSealProgress += 100 / (HOLD_REG / 16);
+      if (regSealProgress > 100) regSealProgress = 100;
+      circle.style.strokeDashoffset = totalLen - (totalLen * regSealProgress / 100);
+
+      if (regSealProgress > 50 && Math.random() > 0.85) screenShake(1);
+      if (regSealProgress > 80 && Math.random() > 0.75) screenShake(2);
+      if (regSealProgress > 90) {
+        screenFlash(20, 0.03);
+        DREAD.add(0.002);
+      }
+
+      if (regSealProgress >= 100) {
+        clearInterval(regSealTimer);
+        completeRegistration();
+      }
+    }, 16);
+  };
+
+  const endHold = () => {
+    clearInterval(regSealTimer);
+    seal.classList.remove('pressing');
+    const decay = setInterval(() => {
+      regSealProgress -= 3;
+      if (regSealProgress <= 0) { regSealProgress = 0; clearInterval(decay); }
+      circle.style.strokeDashoffset = totalLen - (totalLen * regSealProgress / 100);
+    }, 16);
+  };
+
+  seal.addEventListener('mousedown', startHold);
+  seal.addEventListener('touchstart', startHold);
+  document.addEventListener('mouseup', endHold);
+  document.addEventListener('touchend', endHold);
+}
+
+function completeRegistration() {
+  regActive = false;
+  const identity = setIdentity(regName);
+
+  // Impact
+  audio.impact(1.5);
+  screenShake(3);
+  screenFlash(200, 0.2);
+  DREAD.add(0.05);
+
+  // The brand line sears across
+  const brandLine = document.getElementById('reg-brand-line');
+  brandLine.style.width = '100vw';
+  brandLine.style.background = 'linear-gradient(90deg, transparent, rgba(139,32,32,0.8), transparent)';
+
+  // Create cracks where the seal was
+  const sealRect = document.getElementById('reg-seal').getBoundingClientRect();
+  createCrack(sealRect.left + sealRect.width/2, sealRect.top + sealRect.height/2);
+  spawnEmbers(sealRect.left + sealRect.width/2, sealRect.top + sealRect.height/2, 15);
+
+  // Transition to gate
+  setTimeout(() => {
+    audio.drone(6);
+  }, 300);
+
+  setTimeout(() => {
+    const scene = document.getElementById('registration-scene');
+    scene.style.transition = 'opacity 2s';
+    scene.style.opacity = '0';
+    setTimeout(() => {
+      scene.classList.add('hidden');
+      scene.style.opacity = '';
+      showGate(identity);
+    }, 2000);
+  }, 1500);
+}
+
+// ================================================================
 // GATE SYSTEM
-// ============================================================
-let gateHoldTimer = null;
+// ================================================================
 let gateProgress = 0;
+let gateTimer = null;
 let gateOpen = false;
 
-function initGate() {
+function showGate(identity) {
+  const gate = document.getElementById('gate-scene');
+  gate.style.display = 'flex';
+
+  // Staggered reveal
+  const sym = gate.querySelector('.gate-symbol');
+  const title = document.getElementById('gate-title');
+  const sub = document.getElementById('gate-subtitle');
   const seal = document.getElementById('gate-seal');
-  const circle = seal.querySelector('.seal-progress circle');
-  const totalLen = 502;
+
+  setTimeout(() => { sym.style.opacity = ''; }, 300); // Let animation run
+  setTimeout(() => { title.style.transition = 'opacity 2s'; title.style.opacity = '0.6'; }, 800);
+  setTimeout(() => { sub.style.transition = 'opacity 2s'; sub.style.opacity = '1'; }, 2000);
+  setTimeout(() => { seal.style.transition = 'opacity 1.5s'; seal.style.opacity = '1'; }, 3000);
+
+  // If returning user, show whisper
+  if (identity) {
+    const whisper = document.getElementById('welcome-whisper');
+    whisper.textContent = `the hall remembers ${identity.name}`;
+    setTimeout(() => whisper.classList.add('visible'), 5000);
+  }
+
+  initGateSeal();
+}
+
+function initGateSeal() {
+  const seal = document.getElementById('gate-seal');
+  const circle = seal.querySelector('.gate-seal-progress circle');
+  const totalLen = 470;
 
   const startHold = (e) => {
     if (gateOpen) return;
     e.preventDefault();
     audio.init();
-    audio.metalScrape(3);
+    audio.metalScrape(3.2);
     seal.classList.add('pressing');
 
-    gateHoldTimer = setInterval(() => {
-      gateProgress += 100 / (HOLD_DURATION / 16);
+    gateTimer = setInterval(() => {
+      gateProgress += 100 / (HOLD_GATE / 16);
       if (gateProgress > 100) gateProgress = 100;
       circle.style.strokeDashoffset = totalLen - (totalLen * gateProgress / 100);
 
-      // Shake as we get closer
-      if (gateProgress > 60 && Math.random() > 0.8) {
-        screenShake(1);
-      }
-      if (gateProgress > 85 && Math.random() > 0.7) {
-        screenShake(2);
+      // Escalating effects
+      if (gateProgress > 40 && Math.random() > 0.88) screenShake(1);
+      if (gateProgress > 70 && Math.random() > 0.78) screenShake(2);
+      if (gateProgress > 85) {
+        screenFlash(15, 0.03 + (gateProgress-85)/100);
+        DREAD.add(0.001);
       }
 
-      // Distortion increases
-      const distortion = document.getElementById('distortion-overlay');
-      distortion.style.opacity = gateProgress / 200;
-
-      // Gate cracks appear at thresholds
-      if (gateProgress > 40 && gateProgress < 42) {
-        const gc = document.createElement('div');
-        gc.className = 'gate-crack';
-        gc.style.left = (40 + Math.random() * 20) + '%';
-        gc.style.top = (30 + Math.random() * 40) + '%';
-        gc.style.width = (40 + Math.random() * 60) + 'px';
-        gc.style.height = '1px';
-        gc.style.transform = `rotate(${(Math.random() - 0.5) * 40}deg)`;
-        gc.style.opacity = '0.3';
-        document.getElementById('gate-scene').appendChild(gc);
-      }
-      if (gateProgress > 70 && gateProgress < 72) {
-        for (let gc_i = 0; gc_i < 3; gc_i++) {
-          const gc = document.createElement('div');
-          gc.className = 'gate-crack';
-          gc.style.left = (30 + Math.random() * 40) + '%';
-          gc.style.top = (20 + Math.random() * 60) + '%';
-          gc.style.width = (50 + Math.random() * 100) + 'px';
-          gc.style.height = (1 + Math.random()) + 'px';
-          gc.style.transform = `rotate(${(Math.random() - 0.5) * 60}deg)`;
-          gc.style.opacity = '0.4';
-          document.getElementById('gate-scene').appendChild(gc);
-        }
+      // Gate cracks at thresholds
+      if (gateProgress > 35 && gateProgress < 37) {
+        createCrack(window.innerWidth/2 + (Math.random()-0.5)*200, window.innerHeight/2 + (Math.random()-0.5)*100);
         audio.chainRattle();
+      }
+      if (gateProgress > 65 && gateProgress < 67) {
+        createCrack(window.innerWidth/2 + (Math.random()-0.5)*300, window.innerHeight/2 + (Math.random()-0.5)*200);
+        audio.chainRattle();
+        audio.impact(0.5);
+      }
+      if (gateProgress > 90 && gateProgress < 92) {
+        createCrack(window.innerWidth/2, window.innerHeight/2);
+        spawnEmbers(window.innerWidth/2, window.innerHeight/2, 10);
       }
 
       if (gateProgress >= 100) {
-        clearInterval(gateHoldTimer);
+        clearInterval(gateTimer);
         openGate();
       }
     }, 16);
@@ -1533,16 +2137,11 @@ function initGate() {
 
   const endHold = () => {
     if (gateOpen) return;
-    clearInterval(gateHoldTimer);
+    clearInterval(gateTimer);
     seal.classList.remove('pressing');
-
-    // Decay progress
     const decay = setInterval(() => {
-      gateProgress -= 2;
-      if (gateProgress <= 0) {
-        gateProgress = 0;
-        clearInterval(decay);
-      }
+      gateProgress -= 2.5;
+      if (gateProgress <= 0) { gateProgress = 0; clearInterval(decay); }
       circle.style.strokeDashoffset = totalLen - (totalLen * gateProgress / 100);
     }, 16);
   };
@@ -1555,30 +2154,37 @@ function initGate() {
 
 function openGate() {
   gateOpen = true;
-  audio.impact(1.5);
+  audio.impact(2);
   audio.chainRattle();
   screenShake(3);
-  screenFlash(300, 0.2);
+  screenFlash(300, 0.25);
+  DREAD.add(0.08);
 
-  setTimeout(() => {
-    audio.drone(8);
-  }, 500);
+  setTimeout(() => audio.drone(10), 500);
 
   const gate = document.getElementById('gate-scene');
   gate.classList.add('destroyed');
-
   setTimeout(() => {
     gate.style.display = 'none';
     enterHall();
-  }, 1500);
+  }, 1800);
 }
 
-// ============================================================
+// ================================================================
 // JUDGMENT HALL
-// ============================================================
+// ================================================================
 function enterHall() {
   const hall = document.getElementById('hall-scene');
   hall.classList.add('active');
+
+  const identity = getIdentity();
+
+  // Burn identity into the hall
+  if (identity) {
+    const inscription = document.getElementById('hall-inscription');
+    inscription.textContent = `witnessed by ${identity.name}`;
+    setTimeout(() => inscription.classList.add('visible'), 6000);
+  }
 
   // Render candidates
   const row = document.getElementById('candidates-row');
@@ -1591,205 +2197,271 @@ function enterHall() {
     el.dataset.name = c.name;
     el.innerHTML = `
       <div class="candidate-pillar">
-        <div class="torch-light"></div>
+        <div class="candidate-torch"></div>
         <div class="candidate-sigil">${c.sigil}</div>
         <div class="candidate-name">${c.name}</div>
         <div class="candidate-epithet">${c.epithet}</div>
       </div>
-      <div class="reveal-slash"></div>
       <div class="candidate-base"></div>
     `;
     row.appendChild(el);
 
-    // Staggered reveal
+    // Staggered reveal with increasing dread per candidate
     setTimeout(() => {
       el.classList.add('revealed');
       audio.init();
-      if (i > 0) audio.metalScrape(0.5);
-    }, 1500 + i * 600);
+      if (i > 0) audio.metalScrape(0.4);
+      DREAD.add(0.005);
+    }, 2000 + i * 800);
 
-    // Vote on click
+    // Vote on click — with resistance
     el.addEventListener('click', () => {
       if (hasVoted()) return;
-      executeVote(c, el, i);
+      // The site hesitates before accepting the vote
+      el.style.transition = 'none';
+      screenFlash(30, 0.04);
+
+      setTimeout(() => {
+        executeVote(c, el, i);
+      }, 150 + Math.random() * 200); // Deliberate delay — resistance
     });
 
-    // Hover sounds
+    // Hover: subtle environmental reaction
     el.addEventListener('mouseenter', () => {
       audio.init();
-      // Subtle chain on hover
-      const ctx = audio.ctx;
-      if (!ctx) return;
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = 60;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.02, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      osc.connect(g);
-      g.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.3);
+      DREAD.add(0.002);
+      // Low rumble on hover
+      if (audio.ctx) {
+        const now = audio.ctx.currentTime;
+        const osc = audio.ctx.createOscillator();
+        osc.type = 'sine'; osc.frequency.value = 50 + i * 10;
+        const g = audio.ctx.createGain();
+        g.gain.setValueAtTime(0.015, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now+0.4);
+        osc.connect(g); g.connect(audio.ctx.destination);
+        osc.start(now); osc.stop(now+0.4);
+      }
     });
   });
 
-  // If already voted, show aftermath immediately
+  // If already voted, show aftermath
   if (hasVoted()) {
-    setTimeout(() => showPreviousVote(), 2000);
+    setTimeout(() => showPreviousVote(), 2500);
   }
 }
 
-// ============================================================
+// ================================================================
 // EXECUTION
-// ============================================================
+// ================================================================
 function executeVote(candidate, element, index) {
-  recordVote(candidate.name);
+  const identity = getIdentity();
+  if (!identity) return;
+  recordVote(candidate.name, identity);
 
   const allCandidates = document.querySelectorAll('.candidate');
-
-  // Phase 1: Mark chosen
   element.classList.add('chosen');
   allCandidates.forEach(c => {
     if (c !== element) c.classList.add('condemned');
   });
 
+  DREAD.add(0.15);
   audio.swordWhoosh();
 
-  // Phase 2: Sword descent animation
+  // --- SWORD DESCENT ---
   const targetRect = element.getBoundingClientRect();
   const targetX = targetRect.left + targetRect.width / 2;
-
-  let swordProgress = 0;
-  const swordDuration = 800;
+  const swordDuration = 900;
   const swordStart = performance.now();
 
-  initSwordCanvas();
+  swordCanvas.width = window.innerWidth;
+  swordCanvas.height = window.innerHeight;
 
   function animateSword(now) {
     const elapsed = now - swordStart;
-    // Easing: accelerating fall (gravity)
-    swordProgress = Math.min(1, Math.pow(elapsed / swordDuration, 2.2));
+    const progress = Math.min(1, Math.pow(elapsed / swordDuration, 2.5));
 
-    drawSword(swordProgress, targetX);
+    drawSword(progress, targetX);
 
-    if (swordProgress < 1) {
+    if (progress < 1) {
       requestAnimationFrame(animateSword);
     } else {
-      // IMPACT
-      onSwordImpact(targetX, candidate, element);
+      onSwordImpact(targetX, candidate, element, identity);
     }
   }
 
-  setTimeout(() => {
-    requestAnimationFrame(animateSword);
-  }, 400);
+  setTimeout(() => requestAnimationFrame(animateSword), 500);
 }
 
-function onSwordImpact(impactX, candidate, element) {
-  // Massive impact
-  audio.impact(2);
-  screenShake(3);
-  screenFlash(100, 0.3);
+function drawSword(progress, cx) {
+  swordCtx.clearRect(0, 0, swordCanvas.width, swordCanvas.height);
 
-  // Create cracks at impact point
+  const swordLen = swordCanvas.height * 0.55;
+  const sw = 12;
+  const tipY = -swordLen + progress * (swordCanvas.height * 0.55 + swordLen);
+  const handleY = tipY - swordLen;
+
+  swordCtx.save();
+
+  // Blade body
+  swordCtx.strokeStyle = 'rgba(150,145,130,0.75)';
+  swordCtx.lineWidth = sw;
+  swordCtx.shadowColor = 'rgba(196,184,154,0.25)';
+  swordCtx.shadowBlur = 15;
+  swordCtx.beginPath();
+  swordCtx.moveTo(cx, handleY);
+  swordCtx.lineTo(cx, tipY);
+  swordCtx.stroke();
+
+  // Edge highlight
+  swordCtx.strokeStyle = 'rgba(210,205,190,0.35)';
+  swordCtx.lineWidth = 1.5;
+  swordCtx.shadowBlur = 0;
+  swordCtx.beginPath();
+  swordCtx.moveTo(cx - 1, handleY);
+  swordCtx.lineTo(cx - 1, tipY);
+  swordCtx.stroke();
+
+  // Crossguard
+  const guardY = handleY + swordLen * 0.15;
+  swordCtx.strokeStyle = 'rgba(107,90,46,0.6)';
+  swordCtx.lineWidth = 7;
+  swordCtx.beginPath();
+  swordCtx.moveTo(cx - 35, guardY);
+  swordCtx.lineTo(cx + 35, guardY);
+  swordCtx.stroke();
+
+  // Handle
+  swordCtx.strokeStyle = 'rgba(74,42,26,0.5)';
+  swordCtx.lineWidth = sw + 3;
+  swordCtx.beginPath();
+  swordCtx.moveTo(cx, handleY);
+  swordCtx.lineTo(cx, guardY);
+  swordCtx.stroke();
+
+  // Pommel
+  swordCtx.fillStyle = 'rgba(107,90,46,0.5)';
+  swordCtx.beginPath();
+  swordCtx.arc(cx, handleY - 4, 9, 0, Math.PI * 2);
+  swordCtx.fill();
+
+  // Tip
+  swordCtx.fillStyle = 'rgba(190,185,170,0.85)';
+  swordCtx.beginPath();
+  swordCtx.moveTo(cx - sw/2, tipY);
+  swordCtx.lineTo(cx, tipY + 18);
+  swordCtx.lineTo(cx + sw/2, tipY);
+  swordCtx.closePath();
+  swordCtx.fill();
+
+  swordCtx.restore();
+}
+
+function onSwordImpact(impactX, candidate, element, identity) {
   const impactY = window.innerHeight * 0.55;
+
+  // Phase 1: Primary impact
+  audio.impact(2.5);
+  screenShake(3);
+  screenFlash(80, 0.35);
+  DREAD.add(0.1);
+
   createCrack(impactX, impactY);
+  spawnEmbers(impactX, impactY, 30);
 
-  // EMBERS burst from impact
-  spawnEmbers(impactX, impactY, 25);
-
-  // Blood drips
-  for (let i = 0; i < 5; i++) {
-    setTimeout(() => {
-      bloodDrip(impactX - 50 + Math.random() * 100);
-    }, i * 200);
+  for (let i = 0; i < 6; i++) {
+    setTimeout(() => bloodDrip(impactX - 60 + Math.random() * 120), i * 180);
   }
 
-  // Second impact wave
+  // Phase 2: Secondary shockwave
   setTimeout(() => {
-    audio.impact(1);
+    audio.impact(1.2);
     screenShake(2);
-    createCrack(impactX - 100 + Math.random() * 200, impactY + Math.random() * 100);
-    spawnEmbers(impactX + (Math.random() - 0.5) * 100, impactY + Math.random() * 50, 12);
-  }, 300);
+    createCrack(impactX + (Math.random()-0.5)*200, impactY + (Math.random()-0.5)*150);
+    spawnEmbers(impactX + (Math.random()-0.5)*80, impactY + (Math.random()-0.5)*50, 15);
+    DREAD.add(0.05);
+  }, 350);
 
-  // Chain sound
+  // Phase 3: Chain reaction
   setTimeout(() => {
     audio.chainRattle();
-  }, 500);
-
-  // Third wave - more cracks spreading
-  setTimeout(() => {
     screenShake(1);
-    createCrack(
-      window.innerWidth * (0.2 + Math.random() * 0.6),
-      window.innerHeight * (0.3 + Math.random() * 0.4)
-    );
+    createCrack(window.innerWidth * (0.15 + Math.random()*0.7), window.innerHeight * (0.2 + Math.random()*0.6));
   }, 700);
 
-  // Permanent scars
+  // Phase 4: Distant echoes
+  setTimeout(() => {
+    audio.impact(0.4);
+    createCrack(window.innerWidth * Math.random(), window.innerHeight * Math.random());
+  }, 1100);
+
+  // Phase 5: Permanent scarring
   setTimeout(() => {
     createPermanentScars();
-  }, 1000);
+    DREAD.add(0.05);
+  }, 1400);
 
-  // Clear sword and transition to aftermath
+  // Phase 6: Clear sword and begin aftermath
   setTimeout(() => {
-    clearSword();
-    audio.drone(10);
-  }, 1500);
+    swordCtx.clearRect(0, 0, swordCanvas.width, swordCanvas.height);
+    audio.drone(12);
+  }, 1800);
 
+  // Phase 7: Aftermath
   setTimeout(() => {
-    showAftermath(candidate);
-  }, 2500);
+    showAftermath(candidate, identity);
+  }, 3000);
 }
 
-// ============================================================
+// ================================================================
 // AFTERMATH
-// ============================================================
-function showAftermath(candidate) {
-  document.body.classList.add('voted');
-
+// ================================================================
+function showAftermath(candidate, identity) {
   const scene = document.getElementById('aftermath-scene');
   const text = document.getElementById('aftermath-text');
   const name = document.getElementById('aftermath-name');
   const scar = document.getElementById('aftermath-scar');
   const epitaph = document.getElementById('aftermath-epitaph');
+  const identityEl = document.getElementById('aftermath-identity');
 
   name.textContent = candidate.name;
+  if (identity) {
+    identityEl.textContent = `sealed by ${identity.name}`;
+  }
+
   scene.classList.add('active');
 
-  // Staggered reveal
+  // Staggered, heavy reveal
   setTimeout(() => {
-    text.style.transition = 'opacity 2s ease';
-    text.style.opacity = '0.7';
-  }, 1000);
+    text.style.transition = 'opacity 3s';
+    text.style.opacity = '0.6';
+  }, 1500);
 
   setTimeout(() => {
-    name.style.transition = 'opacity 2s ease';
-    name.style.opacity = '0.8';
-  }, 2500);
+    name.style.transition = 'opacity 3s';
+    name.style.opacity = '0.7';
+  }, 3500);
 
   setTimeout(() => {
-    scar.style.transition = 'opacity 1.5s ease';
-    scar.style.opacity = '0.5';
-  }, 4000);
-
-  setTimeout(() => {
-    epitaph.style.transition = 'opacity 2s ease';
-    epitaph.style.opacity = '1';
+    scar.classList.add('visible');
   }, 5500);
+
+  setTimeout(() => {
+    epitaph.classList.add('visible');
+  }, 7500);
+
+  setTimeout(() => {
+    identityEl.classList.add('visible');
+  }, 9000);
 }
 
 function showPreviousVote() {
   const data = getVoteData();
   if (!data) return;
 
-  document.body.classList.add('voted');
-
+  const identity = getIdentity();
   const candidate = CANDIDATES.find(c => c.name === data.candidate) || { name: data.candidate };
 
-  // Mark the chosen one
+  // Mark candidates
   const allCandidates = document.querySelectorAll('.candidate');
   allCandidates.forEach(c => {
     if (c.dataset.name === data.candidate) {
@@ -1799,133 +2471,144 @@ function showPreviousVote() {
     }
   });
 
-  // Show scars
-  const cx = window.innerWidth / 2;
-  const cy = window.innerHeight / 2;
+  // Show existing damage
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
   createCrack(cx, cy);
+  createPermanentScars();
+  DREAD.add(0.2);
 
-  // Show aftermath after a moment
   setTimeout(() => {
     const scene = document.getElementById('aftermath-scene');
     const text = document.getElementById('aftermath-text');
     const name = document.getElementById('aftermath-name');
     const scar = document.getElementById('aftermath-scar');
     const epitaph = document.getElementById('aftermath-epitaph');
+    const identityEl = document.getElementById('aftermath-identity');
 
     text.textContent = 'Your judgment stands';
     name.textContent = candidate.name;
     epitaph.textContent = 'The hall bears your scar — there is no return';
+    if (identity) {
+      identityEl.textContent = `${identity.name} — you are remembered`;
+    }
 
     scene.classList.add('active');
 
-    text.style.transition = 'opacity 2s ease';
-    text.style.opacity = '0.7';
-
-    setTimeout(() => {
-      name.style.transition = 'opacity 2s ease';
-      name.style.opacity = '0.8';
-    }, 1000);
-
-    setTimeout(() => {
-      scar.style.transition = 'opacity 1.5s ease';
-      scar.style.opacity = '0.5';
-    }, 2000);
-
-    setTimeout(() => {
-      epitaph.style.transition = 'opacity 2s ease';
-      epitaph.style.opacity = '1';
-    }, 3000);
-  }, 2000);
+    text.style.transition = 'opacity 2s';
+    text.style.opacity = '0.6';
+    setTimeout(() => { name.style.transition = 'opacity 2s'; name.style.opacity = '0.7'; }, 1200);
+    setTimeout(() => { scar.classList.add('visible'); }, 2500);
+    setTimeout(() => { epitaph.classList.add('visible'); }, 3800);
+    setTimeout(() => { identityEl.classList.add('visible'); }, 5000);
+  }, 2500);
 }
 
-// ============================================================
+// ================================================================
 // MAIN LOOP
-// ============================================================
-let lastTime = 0;
-let ambientTimer = 0;
+// ================================================================
+let lastFrameTime = 0;
+let ambientClock = 0;
+let ghostClock = 0;
+let occluderClock = 0;
+let hallucinationClock = 0;
 
 function mainLoop(time) {
-  const delta = time - lastTime;
-  lastTime = time;
+  const dt = Math.min((time - lastFrameTime) / 1000, 0.1);
+  lastFrameTime = time;
 
-  updateFog(time);
+  // Tick dread accumulator
+  DREAD.tick();
 
-  // Ambient distortion pulses
-  ambientTimer += delta;
-  if (ambientTimer > 5000 + Math.random() * 10000) {
-    ambientTimer = 0;
-    const distortion = document.getElementById('distortion-overlay');
-    distortion.style.opacity = '0.3';
-    setTimeout(() => {
-      distortion.style.opacity = '0';
-    }, 2000 + Math.random() * 3000);
+  // Update cursor
+  updateCursor();
 
-    // Random ambient sounds
-    if (audio.initialized && Math.random() > 0.6) {
-      const roll = Math.random();
-      if (roll < 0.3) {
-        // Distant metal creak
-        audio.metalScrape(0.3);
-      } else if (roll < 0.5) {
-        // Wind-like whisper
-        const ctx = audio.ctx;
-        if (ctx) {
-          const now = ctx.currentTime;
-          const bufSize = ctx.sampleRate * 2;
-          const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-          const d = buf.getChannelData(0);
-          for (let i = 0; i < bufSize; i++) {
-            d[i] = (Math.random() * 2 - 1) * Math.sin(i / bufSize * Math.PI);
-          }
-          const src = ctx.createBufferSource();
-          src.buffer = buf;
-          const flt = ctx.createBiquadFilter();
-          flt.type = 'bandpass';
-          flt.frequency.value = 300 + Math.random() * 200;
-          flt.Q.value = 10;
-          const g = ctx.createGain();
-          g.gain.setValueAtTime(0, now);
-          g.gain.linearRampToValueAtTime(0.015, now + 0.5);
-          g.gain.linearRampToValueAtTime(0, now + 2);
-          src.connect(flt);
-          flt.connect(g);
-          g.connect(ctx.destination);
-          src.start(now);
-        }
-      }
+  // Render background entity
+  renderBackground(time);
+  updateArchitecture(time);
+
+  // Apply Silent Hill distortions
+  applyDistortions(time);
+
+  // Update particles
+  updateParticles(dt);
+
+  // --- Ambient event scheduling ---
+
+  // Ghost text
+  ghostClock += dt;
+  if (ghostClock > 8 + Math.random() * 15) {
+    ghostClock = 0;
+    if (Math.random() < 0.3 + DREAD.level * 0.4) {
+      spawnGhostText();
     }
   }
 
-  // Subtle random screen flicker (very rare)
-  if (Math.random() > 0.998) {
-    const flash = document.getElementById('flash-overlay');
-    flash.style.opacity = '0.02';
-    setTimeout(() => { flash.style.opacity = '0'; }, 50);
+  // Occluders
+  occluderClock += dt;
+  if (occluderClock > 12 + Math.random() * 20) {
+    occluderClock = 0;
+    spawnOccluder();
+  }
+
+  // Audio hallucinations
+  hallucinationClock += dt;
+  if (hallucinationClock > 6 + Math.random() * 12) {
+    hallucinationClock = 0;
+    if (audio.ready && Math.random() < 0.2 + DREAD.level * 0.4) {
+      audio.hallucination();
+    }
+  }
+
+  // Ambient distortion pulses
+  ambientClock += dt;
+  if (ambientClock > 4 + Math.random() * 8) {
+    ambientClock = 0;
+    const distortion = document.getElementById('bg-distortion');
+    const dgrad = `radial-gradient(circle at ${20+Math.random()*60}% ${20+Math.random()*60}%, rgba(90,26,26,${0.05 + DREAD.level*0.1}) 0%, transparent 40%)`;
+    distortion.style.background = dgrad;
+    distortion.style.opacity = '1';
+    setTimeout(() => { distortion.style.opacity = '0'; }, 2000 + Math.random() * 4000);
+  }
+
+  // Rare screen flicker
+  if (Math.random() > 0.998 - DREAD.level * 0.003) {
+    screenFlash(15 + Math.random() * 30, 0.01 + DREAD.level * 0.02);
+  }
+
+  // Idle provocation — environment becomes aggressive
+  if (DREAD.idleDuration > 20 && Math.random() > 0.995) {
+    audio.hallucination();
+    screenFlash(40, 0.03);
+  }
+  if (DREAD.idleDuration > 40 && Math.random() > 0.997) {
+    screenShake(1);
+    spawnGhostText();
   }
 
   requestAnimationFrame(mainLoop);
 }
 
-// ============================================================
+// ================================================================
 // INITIALIZATION
-// ============================================================
-window.addEventListener('resize', () => {
-  fogCanvas.width = window.innerWidth;
-  fogCanvas.height = window.innerHeight;
-  swordCanvas.width = window.innerWidth;
-  swordCanvas.height = window.innerHeight;
-});
-
+// ================================================================
 function init() {
-  initFog();
-  initSwordCanvas();
-  initGate();
+  initFogVolumes();
+  initShadowForms();
+  initScratches();
+  initLightSources();
 
-  // If already voted, skip gate
-  if (hasVoted()) {
-    const gate = document.getElementById('gate-scene');
-    gate.style.display = 'none';
-    enterHall();
+  const identity = getIdentity();
+
+  if (!identity) {
+    // First visit — registration ritual
+    showRegistration();
+  } else if (hasVoted()) {
+    // Already voted — skip to hall with aftermath
+    DREAD.add(0.15);
+    showGate(identity);
+  } else {
+    // Registered but not voted — go to gate
+    showGate(identity);
   }
 
   requestAnimationFrame(mainLoop);
@@ -1933,13 +2616,22 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init);
 
-// Prevent right-click (minor anti-cheat)
+// Prevent right-click
 document.addEventListener('contextmenu', e => e.preventDefault());
 
-// Disable dev tools shortcuts (deterrent only)
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J'))) {
+// Deter dev tools
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
     e.preventDefault();
+    DREAD.add(0.02);
+    screenShake(2);
+    audio.init();
+    audio.errorReject();
+    showRegError && document.getElementById('reg-error') ?
+      (document.getElementById('reg-error').textContent = 'Do not pry',
+       document.getElementById('reg-error').style.opacity = '0.6',
+       setTimeout(() => document.getElementById('reg-error').style.opacity = '0', 2000))
+      : null;
   }
 });
 </script>
